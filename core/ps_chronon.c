@@ -1,3 +1,10 @@
+/*
+@author Abhikalp Unakal
+@date   08 june 2021
+@file   ps_chronon.c
+@desc   wall clock time realted utilities
+*/
+
 #include "ps_chronon.h"
 #include "../pch.h"
 #include "sys/timeb.h"

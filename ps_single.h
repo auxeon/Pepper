@@ -1,8 +1,8 @@
 /*
 @author Abhikalp Unakal
-@date   05 june 2021
-@file   pch.h
-@desc   precompiled header file 
+@date   08 june 2021
+@file   ps_single.c
+@desc   (ps) peppersalt single file library
 */
 
 #ifdef __cplusplus

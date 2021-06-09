@@ -1,3 +1,10 @@
+/*
+@author Abhikalp Unakal
+@date   08 june 2021
+@file   main.c
+@desc   sandbox launcher and tests
+*/
+
 #include "../pch.h"
 #include "../lib/ps_mergesort.h"
 /*

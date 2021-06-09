@@ -1,0 +1,12 @@
+{
+    "cmake.configureOnOpen": false,
+    "files.associations": {
+        "ps_vector.h": "c",
+        "algorithm": "cpp",
+        "pch.h": "c",
+        "ps_chronon.h": "c",
+        "timeb.h": "c",
+        "ps_single.h": "c",
+        "stdbool.h": "c"
+    }
+}

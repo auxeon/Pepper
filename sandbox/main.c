@@ -7,6 +7,9 @@
 
 #include "../pch.h"
 #include "../lib/ps_mergesort.h"
+#include "../lib/glad/include/glad/glad.h"
+#include "../core/ps_graphics.h"
+
 /*
     setting up stuff needed for test0
 */
@@ -91,8 +94,7 @@ void test2(){
         while(ps_clock_dt(c) < (double)1.0/60.0){
             
         }
-        INFO("FPS : %lfs",1.0/ps_clock_dt(c));
-        fflush(stdout);
+        ps_clock_fps_print(c);
         ps_clock_reset(c);
         if(ps_clock_uptime(c) > 1.0){
             break;
@@ -103,14 +105,72 @@ void test2(){
 
 }
 
+
+double x = 0.0f;
+float shapes_delta[] = {120.0f,90.0f,60.0f,45.0f,30.0f,15.0f,5.0f};
+float shapes_time[] = {1.0f,1.0f,1.0f,1.0f,1.0f,1.0f,1.0f};
+int total_shapes = sizeof(shapes_delta)/sizeof(shapes_delta[0]);
+
+void draw_polygon(float delta){
+    float angle = 360.0f;
+    float radius = 0.5f;
+    glBegin(GL_LINE_LOOP);
+    glColor3f(0.5f + sin(x+10),0.5f + sin(x+20),0.5f + sin(x+30));
+    float dx = random()%100;
+    float dy = random()%100;
+    for(float i=0;i<angle;i+=delta){
+        glVertex2f(-0.5f + dx/100.0f + radius*cos(ps_deg2rad(i)),-0.5 + dy/100.0f + radius*sin(ps_deg2rad(i)));
+    }
+    glEnd();
+    glFlush();
+    x += 0.01f;
+}
+
+
 /*
-    opengl stuff
+    opengl rendering with frame rate control and windowing
 */
 void test3(){
+    INFO("[%s] : opengl windowing + 60FPS",__FUNCTION__);
+    ps_graphics_window window;
+    ps_graphics_init(&window,APPNAME,600,600);
+    bool is_running = true;
+
+    ps_clock_data* t = ps_clock_get();
+    ps_clock_data* c = ps_clock_get();
+    ps_clock_start(t);
+    ps_clock_start(c);
+
+    int mode = 0;
+    float delta = shapes_delta[mode];
+    float duration = shapes_time[mode];
+    while(!glfwWindowShouldClose(window.window.handle)){
+        ps_graphics_window_poll_events(&window);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        draw_polygon(shapes_delta[mode]);
+        ps_clock_update(c,60.0);
+        ps_clock_fps_print(c);
+        ps_clock_reset(c);
+        if(ps_clock_uptime(c) > shapes_time[mode]){
+            mode = (mode+1)%total_shapes;
+            ps_clock_reset_uptime(c);
+        }
+        ps_graphics_window_swap_buffers(&window);
+    }
+    ps_graphics_destroy(&window);
+    ps_clock_stop(c);
+    ps_clock_stop(t);
+    INFO("total time : %lfs",ps_clock_uptime(t));
+}
+
+/*
+    test out event system functionality 
+*/
+void test4(){
 
 }
 
-void (*tests[])() = {test0,test1,test2};
+void (*tests[])() = {test0,test1,test2,test3};
 
 int main(int argc,char** argv){
     for(int i=0;i<ps_count(tests);++i){

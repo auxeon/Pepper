@@ -2,11 +2,14 @@
     "cmake.configureOnOpen": false,
     "files.associations": {
         "ps_vector.h": "c",
-        "algorithm": "cpp",
         "pch.h": "c",
         "ps_chronon.h": "c",
         "timeb.h": "c",
         "ps_single.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "ps_graphics.h": "c",
+        "ps_mergesort.h": "c",
+        "glfw3.h": "c",
+        "glad.h": "c",
     }
 }

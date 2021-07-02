@@ -58,6 +58,10 @@ double ps_clock_uptime(ps_clock_data* ps_clock) {
     return (double)(ps_clock_now() - ps_clock->_dawn)/1000;
 }
 
+void ps_clock_reset_uptime(ps_clock_data* ps_clock){
+    ps_clock->_dawn = ps_clock_now();
+}
+
 double ps_clock_dt(ps_clock_data* ps_clock){
     return (double)(ps_clock_now() - ps_vector_back(ps_clock->_timers_t0))/1000; 
 }
@@ -65,3 +69,15 @@ double ps_clock_dt(ps_clock_data* ps_clock){
 void ps_clock_reset(ps_clock_data* ps_clock){
     ps_vector_back(ps_clock->_timers_t0) = ps_clock_now(); 
 }
+
+void ps_clock_fps_print(ps_clock_data* ps_clock){
+    INFO("FPS : %lfs",1.0/ps_clock_dt(ps_clock));
+    fflush(stdout);
+}
+
+void ps_clock_update(ps_clock_data* ps_clock, double fps){
+    while(ps_clock_dt(ps_clock) < (double)1.0/fps){
+            
+    }
+}
+

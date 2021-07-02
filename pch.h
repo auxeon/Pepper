@@ -13,6 +13,7 @@
 #include "string.h"
 #include "time.h"
 #include "stdbool.h"
+#include "math.h"
 #include "core/ps_types.h"
 #include "core/ps_chronon.h"
 #include "lib/ps_vector.h"

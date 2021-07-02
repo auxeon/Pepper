@@ -6,6 +6,7 @@
 */
 
 #include "ps_events.h"
+#include "stdlib.h"
 
 typedef struct ps_event{
     ps_event_id id;

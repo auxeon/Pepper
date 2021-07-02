@@ -11,6 +11,7 @@
         "ps_mergesort.h": "c",
         "glfw3.h": "c",
         "glad.h": "c",
-        "ps_types.h": "c"
+        "ps_types.h": "c",
+        "ps_events.h": "c"
     }
 }

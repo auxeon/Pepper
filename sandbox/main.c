@@ -6,7 +6,6 @@
 */
 
 #include "../pch.h"
-
 /*
     setting up stuff needed for test0
 */
@@ -129,8 +128,8 @@ void draw_polygon(float delta){
 */
 void test3(){
     INFO("[%s] : opengl windowing + 60FPS",__FUNCTION__);
-    ps_graphics_window window;
-    ps_graphics_init(&window,APPNAME,600,600);
+    ps_graphics_window* window;
+    ps_graphics_init(window,APPNAME,600,600);
     bool is_running = true;
 
     ps_clock_data* t = ps_clock_get();
@@ -141,8 +140,8 @@ void test3(){
     int mode = 0;
     float delta = shapes_delta[mode];
     float duration = shapes_time[mode];
-    while(!glfwWindowShouldClose(window.window.handle)){
-        ps_graphics_window_poll_events(&window);
+    while(!ps_graphics_window_should_close(window)){
+        ps_graphics_window_poll_events(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         draw_polygon(shapes_delta[mode]);
         ps_clock_update(c,60.0);
@@ -152,9 +151,9 @@ void test3(){
             mode = (mode+1)%total_shapes;
             ps_clock_reset_uptime(c);
         }
-        ps_graphics_window_swap_buffers(&window);
+        ps_graphics_window_swap_buffers(window);
     }
-    ps_graphics_destroy(&window);
+    ps_graphics_destroy(window);
     ps_clock_stop(c);
     ps_clock_stop(t);
     INFO("total time : %lfs",ps_clock_uptime(t));

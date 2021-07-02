@@ -6,9 +6,6 @@
 */
 
 #include "../pch.h"
-#include "../lib/ps_mergesort.h"
-#include "../lib/glad/include/glad/glad.h"
-#include "../core/ps_graphics.h"
 
 /*
     setting up stuff needed for test0

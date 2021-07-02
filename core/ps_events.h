@@ -8,7 +8,7 @@
 #ifndef PS_EVENTS_H
 #define PS_EVENTS_H
 
-#include "core/ps_types.h"
+#include "ps_types.h"
 
 
 #endif

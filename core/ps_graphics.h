@@ -13,7 +13,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "../lib/glad/include/glad/glad.h"
-#include "GLFW/glfw3.h"
+#include "../lib/glfw/include/GLFW/glfw3.h"
 
 typedef union ps_graphics_impl ps_graphics_impl;
 typedef struct ps_graphics_window ps_graphics_window;

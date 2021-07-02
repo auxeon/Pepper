@@ -19,7 +19,7 @@ extern "C"{
 #include "stdbool.h"
 #include "sys/timeb.h"
 #include "lib/glad/include/glad/glad.h"
-#include "GLFW/glfw3.h"
+#include "lib/glfw/include/GLFW/glfw3.h"
 
 #endif 
 

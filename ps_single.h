@@ -12,20 +12,57 @@ extern "C"{
 #ifndef PCH_H
 #define PCH_H
 
+#include "math.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
 #include "stdbool.h"
 #include "sys/timeb.h"
+#include "lib/glad/include/glad/glad.h"
+#include "GLFW/glfw3.h"
 
 #endif 
 
 #ifndef TYPES_H
 #define TYPES_H
 
+// constants
+#define APPNAME "Pepper"
+#define PI 3.14159265359
+#define PS_COLOR_EMERALD 46.0/256.0, 204/256.0, 113/256.0
+
+// macros
 #define ps_count(x) sizeof(x)/sizeof(x[0])
+#define ps_deg2rad(x) PI/180.0f*x
+#define ps_rad2deg(x) 180.0/PI*x
+
+// colors
 typedef unsigned long size_t;
-// typedef enum {false, true} bool;
+
+typedef struct ps_point{
+    float x;
+    float y;
+    float z;
+    float w;
+}ps_point;
+
+typedef struct ps_color{
+    float r;
+    float g;
+    float b;
+    float a;
+}ps_color;
+
+
+// events
+typedef enum ps_event_id{
+    E_WINDOW_CLOSE,
+    E_WINDOW_KEY_PRESSED,
+        P_WINDOW_KEY_PRESSED_KEYCODE,
+    E_SHAPE_CHANGE,
+        P_FROM_SHAPE,
+        P_TO_SHAPE
+}ps_event_id;
 
 #endif
 
@@ -198,22 +235,26 @@ typedef unsigned long long uint64_t;
 
 ps_clock_data* ps_clock_get();
 
-uint64_t ps_clock_now();
-void    ps_clock_start(ps_clock_data* ps_clock);
-void    ps_clock_stop(ps_clock_data* ps_clock);
-double  ps_clock_uptime(ps_clock_data* ps_clock);
-double  ps_clock_dt(ps_clock_data* ps_clock);
-void    ps_clock_reset(ps_clock_data* ps_clock);
+ps_clock_data*  ps_clock_get();
+uint64_t        ps_clock_now();
+void            ps_clock_start(ps_clock_data* ps_clock);
+void            ps_clock_stop(ps_clock_data* ps_clock);
+double          ps_clock_uptime(ps_clock_data* ps_clock);
+double          ps_clock_dt(ps_clock_data* ps_clock);
+void            ps_clock_reset(ps_clock_data* ps_clock);
+void            ps_clock_fps_print(ps_clock_data* ps_clock);
+void            ps_clock_update(ps_clock_data* ps_clock, double fps);
+void            ps_clock_reset_uptime(ps_clock_data* ps_clock);
 
 
 
 ps_vector_declare(uint64_t);
 
 struct ps_clock_data{
-    ps_vector_uint64_t _timers_t0;
-    uint64_t _dawn;
-    bool _started;
-    double _dt;
+    ps_vector_uint64_t timers_t0;
+    uint64_t dawn;
+    bool started;
+    double dt;
 };
 /*
     accurate to milliseconds resolution
@@ -231,38 +272,129 @@ inline uint64_t ps_clock_now() {
 }
 
 inline ps_clock_data* ps_clock_get(){
-    ps_clock_data* _clock = (ps_clock_data*)malloc(sizeof(ps_clock_data));
-    ps_vector_create(_clock->_timers_t0,uint64_t);
-    _clock->_started = false;
-    _clock->_dt = 0.0;
-    return _clock;
+
+    ps_clock_data* clock = (ps_clock_data*)malloc(sizeof(ps_clock_data));
+    ps_vector_create(clock->timers_t0,uint64_t);
+    clock->started = false;
+    clock->dt = 0.0;
+    return clock;
 }
 
 inline void ps_clock_start(ps_clock_data* ps_clock) {
-    if(!ps_clock->_started){
-        ps_clock->_dawn = ps_clock_now();
-        ps_clock->_started = true;
+    if(!ps_clock->started){
+        ps_clock->dawn = ps_clock_now();
+        ps_clock->started = true;
     }
-    ps_vector_push_back(ps_clock->_timers_t0,ps_clock_now(),uint64_t);
+    ps_vector_push_back(ps_clock->timers_t0,ps_clock_now(),uint64_t);
 }
 inline void ps_clock_stop(ps_clock_data* ps_clock) {
-    if(ps_vector_size(ps_clock->_timers_t0)>0){
-        ps_clock->_dt = (double)(ps_clock_now() - ps_vector_back(ps_clock->_timers_t0))/1000; 
-        ps_vector_pop_back(ps_clock->_timers_t0,uint64_t);
+    if(ps_vector_size(ps_clock->timers_t0)>0){
+        ps_clock->dt = (double)(ps_clock_now() - ps_vector_back(ps_clock->timers_t0))/1000; 
+        ps_vector_pop_back(ps_clock->timers_t0,uint64_t);
     }
 }
 inline double ps_clock_uptime(ps_clock_data* ps_clock) {
-    return (double)(ps_clock_now() - ps_clock->_dawn)/1000;
+    return (double)(ps_clock_now() - ps_clock->dawn)/1000;
+}
+
+inline void ps_clock_reset_uptime(ps_clock_data* ps_clock){
+    ps_clock->dawn = ps_clock_now();
 }
 
 inline double ps_clock_dt(ps_clock_data* ps_clock){
-    return (double)(ps_clock_now() - ps_vector_back(ps_clock->_timers_t0))/1000; 
+    return (double)(ps_clock_now() - ps_vector_back(ps_clock->timers_t0))/1000; 
 }
 
 inline void ps_clock_reset(ps_clock_data* ps_clock){
-    ps_vector_back(ps_clock->_timers_t0) = ps_clock_now(); 
+    ps_vector_back(ps_clock->timers_t0) = ps_clock_now(); 
 }
 
+inline void ps_clock_fps_print(ps_clock_data* ps_clock){
+    INFO("FPS : %lfs",1.0/ps_clock_dt(ps_clock));
+    fflush(stdout);
+}
+
+inline void ps_clock_update(ps_clock_data* ps_clock, double fps){
+    while(ps_clock_dt(ps_clock) < (double)1.0/fps){
+            
+    }
+}
+
+#endif
+
+
+#ifndef PS_GRAPHICS_H
+#define PS_GRAPHICS_H
+#ifdef __APPLE__
+#define GL_SILENCE_DEPRECATION
+#endif
+
+#define GLFW
+
+typedef union ps_graphics_impl{
+    GLFWwindow* handle;
+}ps_graphics_impl;
+
+typedef struct ps_graphics_window{
+    char title[80];
+    int width;
+    int height;
+    ps_graphics_impl window;
+}ps_graphics_window;
+
+void ps_graphics_init(ps_graphics_window* window, const char* title, int width, int height){
+
+    #ifdef GLFW
+    if(!glfwInit()){
+        fprintf(stderr, "%s : %s : line %d : failed to initialize glfw\n",__FILE__, __FUNCTION__, __LINE__);
+        exit(-1);
+    }
+
+    strcpy(window->title,title);
+    window->width = width;
+    window->height = height;
+
+    // create window
+    window->window.handle = glfwCreateWindow(window->width,window->height,window->title,NULL,NULL);
+    if(!window->window.handle){
+        fprintf(stderr, "%s : %s : line %d : failed to create glfw window\n",__FILE__, __FUNCTION__, __LINE__);
+        exit(-1);  
+    }
+    // setup context
+    glfwMakeContextCurrent(window->window.handle);
+
+    // load opengl functions
+    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
+        fprintf(stderr, "%s : %s : line %d : failed to initialize OpenGL context\n",__FILE__, __FUNCTION__, __LINE__);
+        exit(-1);
+    }
+    #endif
+}
+
+int ps_graphics_window_should_close(ps_graphics_window* window){
+    #ifdef GLFW
+    return glfwWindowShouldClose(window->window.handle);
+    #endif
+}
+
+void ps_graphics_window_swap_buffers(ps_graphics_window* window){
+    #ifdef GLFW
+    glfwSwapBuffers(window->window.handle);
+    #endif
+}
+
+void ps_graphics_window_poll_events(ps_graphics_window* window){
+    #ifdef GLFW
+    glfwPollEvents();
+    #endif
+}
+
+void ps_graphics_destroy(ps_graphics_window* window){
+    #ifdef GLFW
+    glfwDestroyWindow(window->window.handle);
+    glfwTerminate();
+    #endif
+}
 #endif
 
 #ifdef __cplusplus

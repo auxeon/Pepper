@@ -44,3 +44,7 @@ set_target_properties(pepper
 add_subdirectory(core)
 add_subdirectory(lib)
 add_subdirectory(sandbox)
+
+if (MSVC)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT sandbox)
+endif()

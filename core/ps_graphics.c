@@ -24,6 +24,14 @@ typedef struct ps_graphics_window{
     ps_graphics_impl window;
 }ps_graphics_window;
 
+ps_graphics_window* ps_graphics_get_window() {
+    return (ps_graphics_window*)malloc(sizeof(ps_graphics_window));
+}
+
+void ps_graphics_release_window(ps_graphics_window* window) {
+    free(window);
+}
+
 void ps_graphics_init(ps_graphics_window* window, const char* title, int width, int height){
 
     #ifdef GLFW

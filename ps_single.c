@@ -7,6 +7,9 @@
 
 #include "ps_single.h"
 
+#ifdef _WIN64
+#define random rand
+#endif
 
 #ifdef __cplusplus
 extern "C"{

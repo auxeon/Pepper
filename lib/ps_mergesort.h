@@ -11,7 +11,7 @@
 #include "stdlib.h"
 #include "stdio.h"
 
-typedef unsigned long size_t;
+//typedef unsigned long size_t;
 
 void ps_merge(
         void* vector,

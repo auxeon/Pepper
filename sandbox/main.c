@@ -6,6 +6,11 @@
 */
 
 #include "../pch.h"
+
+#ifdef _WIN64
+#define random rand
+#endif
+
 /*
     setting up stuff needed for test0
 */
@@ -128,7 +133,7 @@ void draw_polygon(float delta){
 */
 void test3(){
     INFO("[%s] : opengl windowing + 60FPS",__FUNCTION__);
-    ps_graphics_window* window;
+    ps_graphics_window* window = ps_graphics_get_window();
     ps_graphics_init(window,APPNAME,600,600);
     bool is_running = true;
 
@@ -140,7 +145,7 @@ void test3(){
     int mode = 0;
     float delta = shapes_delta[mode];
     float duration = shapes_time[mode];
-    while(!ps_graphics_window_should_close(window)){
+    while(is_running){
         ps_graphics_window_poll_events(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         draw_polygon(shapes_delta[mode]);
@@ -152,8 +157,10 @@ void test3(){
             ps_clock_reset_uptime(c);
         }
         ps_graphics_window_swap_buffers(window);
+        is_running = !ps_graphics_window_should_close(window);
     }
     ps_graphics_destroy(window);
+    ps_graphics_release_window(window);
     ps_clock_stop(c);
     ps_clock_stop(t);
     INFO("total time : %lfs",ps_clock_uptime(t));
@@ -163,7 +170,7 @@ void test3(){
     test out event system functionality 
 */
 void test4(){
-
+    
 }
 
 void (*tests[])() = {test0,test1,test2,test3};

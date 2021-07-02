@@ -19,7 +19,7 @@
 #define ps_rad2deg(x) 180.0/PI*x
 
 // colors
-typedef unsigned long size_t;
+//typedef unsigned long size_t;
 
 typedef struct ps_point{
     float x;

@@ -37,7 +37,7 @@ extern "C"{
 #define ps_rad2deg(x) 180.0/PI*x
 
 // colors
-typedef unsigned long size_t;
+//typedef unsigned long size_t;
 
 typedef struct ps_point{
     float x;
@@ -162,7 +162,7 @@ typedef struct ps_vector_##type ps_vector_##type
 #ifndef PS_MERGESORT_H
 #define PS_MERGESORT_H
 
-typedef unsigned long size_t;
+//typedef unsigned long size_t;
 
 void ps_merge(
         void* vector,

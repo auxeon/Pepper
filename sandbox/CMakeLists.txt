@@ -1,10 +1,11 @@
 project(sandbox C CXX)
 
 set(sandbox_SOURCES
-    main.c
+    "main.c"
 )
 set(sandbox_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}"
+    ""
 )
 
 add_executable(sandbox ${sandbox_SOURCES} ${sandbox_INCLUDES})

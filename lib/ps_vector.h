@@ -51,7 +51,9 @@ typedef struct ps_vector_##type ps_vector_##type
 
 #define ps_vector_pop_back(vec,type){\
     if((vec).size > 0){\
-        (vec).data = (type*)realloc((vec).data,((vec).size-1)*sizeof((vec).data[0]));\
+        type* tmp = NULL;\
+        tmp = (type*)realloc((vec).data,((vec).size-1)*sizeof((vec).data[0]));\
+        (vec).data = (tmp)?tmp:NULL;\
         (vec).size -= 1;\
     }\
 }

@@ -32,6 +32,6 @@ typedef enum ps_event_id{
     E_SHAPE_CHANGE,
         P_FROM_SHAPE,
         P_TO_SHAPE
-}ps_event_type;
+}ps_event_id;
 
 #endif

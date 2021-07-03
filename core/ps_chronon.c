@@ -38,9 +38,11 @@ uint64_t ps_clock_now() {
 ps_clock_data* ps_clock_get(){
 
     ps_clock_data* clock = (ps_clock_data*)malloc(sizeof(ps_clock_data));
-    ps_vector_create(clock->timers_t0,uint64_t);
-    clock->started = false;
-    clock->dt = 0.0;
+    if (clock) {
+        ps_vector_create(clock->timers_t0, uint64_t);
+        clock->started = false;
+        clock->dt = 0.0;
+    }
     return clock;
 }
 
@@ -53,7 +55,7 @@ void ps_clock_start(ps_clock_data* ps_clock) {
 }
 void ps_clock_stop(ps_clock_data* ps_clock) {
     if(ps_vector_size(ps_clock->timers_t0)>0){
-        ps_clock->dt = (double)(ps_clock_now() - ps_vector_back(ps_clock->timers_t0))/1000; 
+        ps_clock->dt = (double)(ps_clock_now() - ps_vector_back(ps_clock->timers_t0))/1000.0; 
         ps_vector_pop_back(ps_clock->timers_t0,uint64_t);
     }
 }
@@ -74,7 +76,7 @@ void ps_clock_reset(ps_clock_data* ps_clock){
 }
 
 void ps_clock_fps_print(ps_clock_data* ps_clock){
-    INFO("FPS : %lfs",1.0/ps_clock_dt(ps_clock));
+    INFO("%lf FPS",1.0/ps_clock_dt(ps_clock));
     fflush(stdout);
 }
 

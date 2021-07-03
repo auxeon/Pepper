@@ -1,7 +1,7 @@
 /*
 @author Abhikalp Unakal
 @date   08 june 2021
-@file   ps_engine.c
+@file   ps_graphics.c
 @desc   pepper engine api wrapper for future
 */
 
@@ -40,7 +40,7 @@ void ps_graphics_init(ps_graphics_window* window, const char* title, int width, 
         exit(-1);
     }
 
-    strcpy(window->title,title);
+    strcpy_s(window->title,sizeof(window->title),title);
     window->width = width;
     window->height = height;
 
@@ -58,6 +58,12 @@ void ps_graphics_init(ps_graphics_window* window, const char* title, int width, 
         fprintf(stderr, "%s : %s : line %d : failed to initialize OpenGL context\n",__FILE__, __FUNCTION__, __LINE__);
         exit(-1);
     }
+    #endif
+}
+
+void ps_graphics_window_set_title(ps_graphics_window* window, const char* buffer) {
+    #ifdef GLFW
+    glfwSetWindowTitle(window->window.handle, buffer);
     #endif
 }
 

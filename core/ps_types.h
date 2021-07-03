@@ -10,6 +10,7 @@
 
 // constants
 #define APPNAME "Pepper"
+#define FPS 30
 #define PI 3.14159265359
 #define PS_COLOR_EMERALD 46.0/256.0, 204/256.0, 113/256.0
 

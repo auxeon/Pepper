@@ -1,8 +1,8 @@
-/*
-@author Abhikalp Unakal
-@date   05 june 2021
-@file   pch.h
-@desc   precompiled header file 
+/**
+ @author Abhikalp Unakal
+ @date 05 june 2021
+ @file pch.h
+ @brief precompiled header file 
 */
 
 #ifndef PCH_H

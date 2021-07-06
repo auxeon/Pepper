@@ -1,8 +1,8 @@
-/*
-@author Abhikalp Unakal
-@date   05 june 2021
-@file   ps_vector.h
-@desc   ps_vector container implemented using macros 
+/**
+ @author Abhikalp Unakal
+ @date 05 june 2021
+ @file ps_vector.h
+ @brief ps_vector container implemented using macros 
 */
 #ifndef VECTOR_H
 #define VECTOR_H

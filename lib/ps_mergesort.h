@@ -1,8 +1,8 @@
-/*
-@author Abhikalp Unakal
-@date   06 june 2021
-@file   mergesort.h
-@desc   header file to sort stuff in a generic sense
+/**
+ @author Abhikalp Unakal
+ @date 06 june 2021
+ @file mergesort.h
+ @brief header file to sort stuff in a generic sense
 */
 #ifndef PS_MERGESORT_H
 #define PS_MERGESORT_H

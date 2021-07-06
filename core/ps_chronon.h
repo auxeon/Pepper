@@ -1,8 +1,8 @@
-/*
-@author Abhikalp Unakal
-@date   08 june 2021
-@file   ps_chronon.h
-@desc   wall clock time realted utilities
+/**
+ @author Abhikalp Unakal
+ @date 08 june 2021
+ @file ps_chronon.h
+ @brief wall clock time realted utilities
 */
 
 #ifndef PS_CHRONON_H

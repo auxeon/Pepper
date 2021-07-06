@@ -1,8 +1,8 @@
-/*
-@author Abhikalp Unakal
-@date   08 june 2021
-@file   ps_graphics.c
-@desc   pepper engine api wrapper for future
+/**
+ @author Abhikalp Unakal
+ @date 08 june 2021
+ @file ps_graphics.c
+ @brief pepper engine api wrapper for future
 */
 
 #include "ps_graphics.h"

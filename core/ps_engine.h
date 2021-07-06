@@ -1,8 +1,8 @@
-/*
-@author Abhikalp Unakal
-@date   08 june 2021
-@file   ps_engine.h
-@desc   pepper engine api wrapper for future
+/**
+ @author Abhikalp Unakal
+ @date 08 june 2021
+ @file ps_engine.h
+ @brief pepper engine api wrapper for future
 */
 
 #ifndef PEPPER_H

@@ -1,8 +1,8 @@
-/*
-@author Abhikalp Unakal
-@date   08 june 2021
-@file   ps_logging.c
-@desc   logging helpers
+/**
+ @author Abhikalp Unakal
+ @date 08 june 2021
+ @file ps_logging.c
+ @brief logging helpers
 */
 
 #ifndef PS_LOGGING_H

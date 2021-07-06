@@ -1,8 +1,8 @@
-/*
-@author Abhikalp Unakal
-@date   08 june 2021
-@file   ps_graphics.h
-@desc   pepper engine graphics api
+/**
+ @author Abhikalp Unakal
+ @date 08 june 2021
+ @file ps_graphics.h
+ @brief pepper engine graphics api
 */
 
 #ifndef PS_GRAPHICS_H

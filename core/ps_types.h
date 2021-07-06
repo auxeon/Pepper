@@ -1,8 +1,8 @@
-/*
-@author Abhikalp Unakal
-@date   08 june 2021
-@file   ps_types.h
-@desc   custom types
+/**
+ @author Abhikalp Unakal
+ @date 08 june 2021
+ @file ps_types.h
+ @brief custom types
 */
 
 #ifndef TYPES_H

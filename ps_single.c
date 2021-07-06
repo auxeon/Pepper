@@ -1,8 +1,8 @@
-/*
-@author Abhikalp Unakal
-@date   08 june 2021
-@file   ps_single.c
-@desc   pepper space single file library
+/**
+ @author Abhikalp Unakal
+ @date 08 june 2021
+ @file ps_single.c
+ @brief pepper space single file library
 */
 
 #include "ps_single.h"

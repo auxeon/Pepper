@@ -11,14 +11,16 @@
 #include "stdlib.h"
 #include "stdio.h"
 
-//typedef unsigned long size_t;
+#ifdef _WIN64
+typedef long long size_t;
+#endif
 
 void ps_merge(
         void* vector,
         size_t start,
         size_t end,
         size_t data_size,
-        int cmp(const void* a, const void* b, size_t data_size)
+        int cmp(const void* a, const void* b)
     ){
 
     size_t i=0,j=0,k=start;
@@ -39,7 +41,7 @@ void ps_merge(
     memcpy(r, (char*)vector + data_size*(mid + 1), data_size*rn);
 
     while(i<ln && j<rn){
-        if(cmp(l + data_size*i, r + data_size*j, data_size)){
+        if(cmp(l + data_size*i, r + data_size*j)){
             memcpy((char*)vector + data_size*(k++), l + data_size*(i++), data_size*(1));
         }
         else{
@@ -61,7 +63,7 @@ void ps_mergesort(
         size_t start,
         size_t end,
         size_t data_size,
-        int cmp(const void* a, const void* b, size_t data_size)
+        int cmp(const void* a, const void* b)
     ){
 
     if(start >= end){

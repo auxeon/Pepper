@@ -8,6 +8,10 @@
 #define VECTOR_H
 #include "stdio.h"
 
+#ifdef _WIN64
+typedef long long size_t;
+#endif
+
 #define ps_vector_declare(type) struct ps_vector_##type {\
     type* data;\
     size_t size;\

@@ -6,6 +6,7 @@
 */
 
 #include "../pch.h"
+#include "../lib/ps_heap.h"
 
 #ifdef _WIN64
 #define random rand
@@ -60,8 +61,7 @@ void test0(){
 
 int compare_vector_node(
         const void* a, 
-        const void* b, 
-        size_t data_size
+        const void* b
     ){
     return (*(const node*)a).val < (*(const node*)b).val;
 }
@@ -92,7 +92,7 @@ void test2(){
     ps_clock_data* c = ps_clock_get();
     ps_clock_start(c);
     while(true){
-        while(ps_clock_dt(c) < (double)1.0/60.0){
+        while(ps_clock_dt(c) < (double)1.0/FPS){
             
         }
         ps_clock_fps_print(c);
@@ -131,7 +131,7 @@ inline void draw_polygon(float delta){
 inline void draw_rectangle(float xmin, float ymin, float w, float h) {
     glColor3f((GLfloat)0.5f + (GLfloat)sin(y + 10), (GLfloat)0.5f + (GLfloat)sin(y + 20), (GLfloat)0.5f + (GLfloat)sin(y + 30));
     //glColor3f(0.0f, 0.8f, 0.6f);
-    glBegin(GL_POLYGON);
+    glBegin(GL_LINE_LOOP);
     glVertex2f((GLfloat)xmin, (GLfloat)ymin);
     glVertex2f((GLfloat)xmin+w, (GLfloat)ymin);
     glVertex2f((GLfloat)xmin+w, (GLfloat)ymin+h);
@@ -146,15 +146,16 @@ inline void draw_rectangle(float xmin, float ymin, float w, float h) {
     opengl rendering with frame rate control and windowing
 */
 void test3(){
-    INFO("[%s] : opengl windowing + 60FPS",__FUNCTION__);
-    ps_graphics_window* window = ps_graphics_get_window();
-    ps_graphics_init(window,APPNAME,800,800);
-    bool is_running = true;
+    INFO("[%s] : opengl windowing + %dFPS",__FUNCTION__,FPS);
 
     ps_clock_data* t = ps_clock_get();
     ps_clock_data* c = ps_clock_get();
     ps_clock_start(t);
     ps_clock_start(c);
+    
+    ps_graphics_window* window = ps_graphics_get_window();
+    ps_graphics_init(window,APPNAME,APPW,APPH);
+    bool is_running = true;
 
     int mode = 0;
     float delta = shapes_delta[mode];
@@ -163,14 +164,14 @@ void test3(){
     while(is_running){
         ps_graphics_window_poll_events(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        //for (int i = 0; i < 100; ++i) {
-        //    draw_polygon(shapes_delta[mode]);
-        //}
-        float dx = 0.05f;
-        float pad = 0.0f;
-        for (int r = 0; r < 40; ++r) {
-            draw_rectangle(-1.0f+(r*(dx+pad)), -1.0f, 0.05f, rand()%10/20.0f);
+        for (int i = 0; i < 10; ++i) {
+            draw_polygon(shapes_delta[mode]);
         }
+        //float dx = 0.05f;
+        //float pad = 0.0f;
+        //for (int r = 0; r < 40; ++r) {
+        //    draw_rectangle(-1.0f+(r*(dx+pad)), -1.0f, 0.05f, rand()%10/20.0f);
+        //}
         ps_clock_update(c,FPS);
         sprintf_s(buffer, sizeof(buffer), "[%s] (%d FPS)",APPNAME, (int)ceil(1.0 / ps_clock_dt(c)));
         ps_graphics_window_set_title(window, buffer);
@@ -190,13 +191,75 @@ void test3(){
 }
 
 /*
-    test out event system functionality 
+    test out heap
 */
+#define count(x) sizeof(x)/sizeof(x[0])
+int cmp_int(const void* a, const void* b) {
+    return *((int*)a) > *((int*)b);
+}
+void print_int(void* vec, size_t n) {
+    for(int i = 0; i < n; ++i) {
+        printf("%d ", ((int*)vec)[i]);
+    }
+    printf("\n");
+}
 void test4(){
-    
+    INFO("[%s] : heapify test", __FUNCTION__);
+    ps_clock_data* t = ps_clock_get();
+    ps_clock_start(t);
+    int data[] = { 23, 3, 5, 4, 6, 13, 10, 9, 8, 15, 17 };
+    INFO("before heapify : \n");
+    print_int(data, count(data));
+    make_heap(data, count(data), sizeof(data[0]), cmp_int);
+    INFO("after heapify : \n");
+    print_int(data, count(data));
+    ps_clock_stop(t);
+    INFO("total time : %lfs", ps_clock_uptime(t));
 }
 
-void (*tests[])() = {test0,test1,test2,test3};
+void test5(){
+    const int nbins = 128;
+    INFO("[%s] : FFT BARS+ %d",__FUNCTION__,nbins);
+    char buffer[80];
+    ps_clock_data* t = ps_clock_get();
+    ps_clock_start(t);
+    float* samples = malloc(sizeof(float)*nbins);
+    for(int i=0;i<nbins;++i){
+        samples[i] = 0.1f;
+    }
+
+    ps_graphics_window* window = ps_graphics_get_window();
+    ps_graphics_init(window,APPNAME,APPW,APPH);
+
+    bool is_running = true;
+    while(is_running){
+        ps_graphics_window_poll_events(window);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        int bars = 128;
+        float dx = 2.0/(float)(bars+1);
+        float pad = 0.0f;
+        for (int r = 0; r < bars; ++r) {
+            draw_rectangle(-1.0f+dx/2+(r*(dx+pad)), -1.0f, dx, rand()%50/30.0f + samples[r]);
+        }
+
+        ps_clock_update(t,FPS);
+        sprintf_s(buffer, sizeof(buffer), "[%s] (%d FPS)",APPNAME, (int)ceil(1.0 / ps_clock_dt(t)));
+        ps_graphics_window_set_title(window, buffer);
+        ps_clock_reset(t);
+        ps_graphics_window_swap_buffers(window);
+        is_running = !ps_graphics_window_should_close(window);
+    }
+
+    ps_graphics_destroy(window);
+    ps_graphics_release_window(window);
+
+    free(samples);
+    ps_clock_stop(t);
+    INFO("total time : %lfs", ps_clock_uptime(t));
+}
+
+void (*tests[])() = {test0,test1,test2,test3,test4,test5};
 
 int main(int argc,char** argv){
     for(int i=0;i<ps_count(tests);++i){

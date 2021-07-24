@@ -113,7 +113,7 @@ float shapes_delta[] = {120.0f,90.0f,60.0f,45.0f,30.0f,15.0f,5.0f};
 float shapes_time[] = {1.0f,1.0f,1.0f,1.0f,1.0f,1.0f,1.0f};
 int total_shapes = sizeof(shapes_delta)/sizeof(shapes_delta[0]);
 
-inline void draw_polygon(float delta){
+void draw_polygon(float delta){
     float angle = 360.0f;
     float radius = 0.5f;
     glBegin(GL_LINE_LOOP);
@@ -128,7 +128,7 @@ inline void draw_polygon(float delta){
     x += 0.001f;
 }
 
-inline void draw_rectangle(float xmin, float ymin, float w, float h) {
+void draw_rectangle(float xmin, float ymin, float w, float h) {
     glColor3f((GLfloat)0.5f + (GLfloat)sin(y + 10), (GLfloat)0.5f + (GLfloat)sin(y + 20), (GLfloat)0.5f + (GLfloat)sin(y + 30));
     //glColor3f(0.0f, 0.8f, 0.6f);
     glBegin(GL_LINE_LOOP);
@@ -173,7 +173,7 @@ void test3(){
         //    draw_rectangle(-1.0f+(r*(dx+pad)), -1.0f, 0.05f, rand()%10/20.0f);
         //}
         ps_clock_update(c,FPS);
-        sprintf_s(buffer, sizeof(buffer), "[%s] (%d FPS)",APPNAME, (int)ceil(1.0 / ps_clock_dt(c)));
+        sprintf(buffer, "[%s] (%d FPS)",APPNAME, (int)ceil(1.0 / ps_clock_dt(c)));
         ps_graphics_window_set_title(window, buffer);
         ps_clock_reset(c);
         if(ps_clock_uptime(c) > shapes_time[mode]){
@@ -244,7 +244,7 @@ void test5(){
         }
 
         ps_clock_update(t,FPS);
-        sprintf_s(buffer, sizeof(buffer), "[%s] (%d FPS)",APPNAME, (int)ceil(1.0 / ps_clock_dt(t)));
+        sprintf(buffer, "[%s] (%d FPS)",APPNAME, (int)ceil(1.0 / ps_clock_dt(t)));
         ps_graphics_window_set_title(window, buffer);
         ps_clock_reset(t);
         ps_graphics_window_swap_buffers(window);

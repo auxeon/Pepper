@@ -40,7 +40,8 @@ void ps_graphics_init(ps_graphics_window* window, const char* title, int width, 
         exit(-1);
     }
 
-    strcpy_s(window->title,sizeof(window->title),title);
+
+    strcpy(window->title,title);
     window->width = width;
     window->height = height;
 

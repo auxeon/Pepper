@@ -13,6 +13,7 @@
         "glad.h": "c",
         "ps_types.h": "c",
         "ps_events.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "string.h": "c"
     }
 }

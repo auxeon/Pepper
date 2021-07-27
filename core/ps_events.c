@@ -7,8 +7,9 @@
 
 #include "ps_events.h"
 #include "stdlib.h"
+#include "../ps_types.h"
 
 typedef struct ps_event{
     ps_event_id id;
-    size_t sz;
+    ps_size_t sz;
 }ps_event;

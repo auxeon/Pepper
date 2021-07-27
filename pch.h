@@ -17,8 +17,9 @@
 #include "time.h"
 #include "core/ps_chronon.h"
 #include "core/ps_graphics.h"
-#include "core/ps_types.h"
+#include "lib/ps_heap.h"
 #include "lib/ps_logging.h"
 #include "lib/ps_mergesort.h"
 #include "lib/ps_vector.h"
+#include "../ps_types.h"
 #endif 

@@ -21,9 +21,7 @@
 #define ps_deg2rad(x) PI/180.0f*x
 #define ps_rad2deg(x) 180.0/PI*x
 
-// colors
-//typedef unsigned long size_t;
-
+// typedefs
 typedef struct ps_point{
     float x;
     float y;
@@ -38,8 +36,8 @@ typedef struct ps_color{
     float a;
 }ps_color;
 
+typedef long long ps_size_t;
 
-// events
 typedef enum ps_event_id{
     E_WINDOW_CLOSE,
     E_WINDOW_KEY_PRESSED,

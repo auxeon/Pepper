@@ -7,10 +7,7 @@
 
 #include "stdlib.h"
 #include "string.h"
-
-#ifdef _WIN64
-typedef long long size_t;
-#endif
+#include "../ps_types.h"
 
 #define parent(i) (i-1)/2
 #define left(i) 2*i + 1
@@ -18,9 +15,9 @@ typedef long long size_t;
 
 void heapify(
     void* vec,
-    size_t i,
-    size_t n,
-    size_t data_size,
+    ps_size_t i,
+    ps_size_t n,
+    ps_size_t data_size,
     int cmp(const void* a, const void* b)
     ){
     void* temp = malloc(data_size);
@@ -28,9 +25,9 @@ void heapify(
         return;
     }
     while (1) {
-        size_t l = left(i);
-        size_t r = right(i);
-        size_t max_e = i;
+        ps_size_t l = left(i);
+        ps_size_t r = right(i);
+        ps_size_t max_e = i;
         if (l < n && l >= 0 && cmp((char*)vec + (data_size*max_e), (char*)vec + (data_size*l))) {
             max_e = l;
         }
@@ -52,11 +49,11 @@ void heapify(
 
 void make_heap(
     void* vec,
-    size_t n,
-    size_t data_size,
+    ps_size_t n,
+    ps_size_t data_size,
     int cmp(const void* a, const void* b)
     ){
-    for (int i = n/2; i >= 0; --i) {
+    for (ps_size_t i = n/2; i >= 0; --i) {
         heapify(vec, i, n, data_size, cmp);
     }
 }

@@ -4,6 +4,9 @@
  @file ps_graphics.c
  @brief pepper engine api wrapper for future
 */
+#ifdef _WIN64
+#define _CRT_SECURE_NO_WARNINGS
+#endif
 
 #include "ps_graphics.h"
 

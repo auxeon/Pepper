@@ -5,7 +5,7 @@ set(sandbox_SOURCES
 )
 set(sandbox_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}"
-    ""
+    "${CMAKE_CURRENT_SOURCE_DIR}/../ps_types.h"
 )
 
 add_executable(sandbox ${sandbox_SOURCES} ${sandbox_INCLUDES})

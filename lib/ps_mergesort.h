@@ -10,24 +10,21 @@
 #include "string.h"
 #include "stdlib.h"
 #include "stdio.h"
-
-#ifdef _WIN64
-typedef long long size_t;
-#endif
+#include "../ps_types.h"
 
 void ps_merge(
         void* vector,
-        size_t start,
-        size_t end,
-        size_t data_size,
+        ps_size_t start,
+        ps_size_t end,
+        ps_size_t data_size,
         int cmp(const void* a, const void* b)
     ){
 
-    size_t i=0,j=0,k=start;
+    ps_size_t i=0,j=0,k=start;
     
-    size_t mid = start + (end-start)/2;
-    size_t ln = mid-start+1;
-    size_t rn = end-mid;
+    ps_size_t mid = start + (end-start)/2;
+    ps_size_t ln = mid-start+1;
+    ps_size_t rn = end-mid;
     
     char* l = (char*)calloc(ln,data_size);
     char* r = (char*)calloc(rn,data_size);
@@ -60,9 +57,9 @@ void ps_merge(
 
 void ps_mergesort(
         void* vector,
-        size_t start,
-        size_t end,
-        size_t data_size,
+        ps_size_t start,
+        ps_size_t end,
+        ps_size_t data_size,
         int cmp(const void* a, const void* b)
     ){
 
@@ -70,7 +67,7 @@ void ps_mergesort(
         return;
     }
     
-    size_t mid = start + (end-start)/2;
+    ps_size_t mid = start + (end-start)/2;
     ps_mergesort(vector, start, mid, data_size, cmp);
     ps_mergesort(vector, mid+1, end, data_size, cmp);
     ps_merge(vector,start,end,data_size,cmp);

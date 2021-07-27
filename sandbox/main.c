@@ -5,12 +5,12 @@
 @desc   sandbox launcher and tests
 */
 
-#include "../pch.h"
-#include "../lib/ps_heap.h"
-
 #ifdef _WIN64
 #define random rand
+#define _CRT_SECURE_NO_WARNINGS
 #endif
+
+#include "../pch.h"
 
 /*
     setting up stuff needed for test0
@@ -38,7 +38,7 @@ void display_macro_version(ps_vector_node* v){
     printf("\n");
 }
 
-void display_merge(void* n, size_t size){
+void display_merge(void* n, ps_size_t size){
     for(int i=0;i<size;++i){
         printf("%d ",((node*)n)[i].val);
     }
@@ -124,20 +124,19 @@ void draw_polygon(float delta){
         glVertex2f((GLfloat)-0.5f + dx/100.0f + radius* (GLfloat)cos(ps_deg2rad(i)), (GLfloat)-0.5 + dy/100.0f + radius* (GLfloat)sin(ps_deg2rad(i)));
     }
     glEnd();
-    glFlush();
+    //glFlush();
     x += 0.001f;
 }
 
 void draw_rectangle(float xmin, float ymin, float w, float h) {
     glColor3f((GLfloat)0.5f + (GLfloat)sin(y + 10), (GLfloat)0.5f + (GLfloat)sin(y + 20), (GLfloat)0.5f + (GLfloat)sin(y + 30));
-    //glColor3f(0.0f, 0.8f, 0.6f);
     glBegin(GL_LINE_LOOP);
     glVertex2f((GLfloat)xmin, (GLfloat)ymin);
     glVertex2f((GLfloat)xmin+w, (GLfloat)ymin);
     glVertex2f((GLfloat)xmin+w, (GLfloat)ymin+h);
     glVertex2f((GLfloat)xmin, (GLfloat)ymin+h);
     glEnd();
-    glFlush();
+    //glFlush();
     y += 0.001f;
 }
 
@@ -164,9 +163,9 @@ void test3(){
     while(is_running){
         ps_graphics_window_poll_events(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        for (int i = 0; i < 10; ++i) {
+         for (int i = 0; i < 10; ++i) {
             draw_polygon(shapes_delta[mode]);
-        }
+         }
         //float dx = 0.05f;
         //float pad = 0.0f;
         //for (int r = 0; r < 40; ++r) {
@@ -197,7 +196,7 @@ void test3(){
 int cmp_int(const void* a, const void* b) {
     return *((int*)a) > *((int*)b);
 }
-void print_int(void* vec, size_t n) {
+void print_int(void* vec, ps_size_t n) {
     for(int i = 0; i < n; ++i) {
         printf("%d ", ((int*)vec)[i]);
     }
@@ -223,7 +222,11 @@ void test5(){
     char buffer[80];
     ps_clock_data* t = ps_clock_get();
     ps_clock_start(t);
-    float* samples = malloc(sizeof(float)*nbins);
+    float* samples = (float*)malloc(sizeof(float)*nbins);
+    if (!samples) {
+        fprintf(stderr, "samples malloc failed");
+        exit(-1);
+    }
     for(int i=0;i<nbins;++i){
         samples[i] = 0.1f;
     }
@@ -236,8 +239,8 @@ void test5(){
         ps_graphics_window_poll_events(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        int bars = 128;
-        float dx = 2.0/(float)(bars+1);
+        int bars = nbins;
+        float dx = 2.0f/(float)(bars+1);
         float pad = 0.0f;
         for (int r = 0; r < bars; ++r) {
             draw_rectangle(-1.0f+dx/2+(r*(dx+pad)), -1.0f, dx, rand()%50/30.0f + samples[r]);

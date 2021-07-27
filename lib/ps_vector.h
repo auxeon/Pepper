@@ -4,18 +4,17 @@
  @file ps_vector.h
  @brief ps_vector container implemented using macros 
 */
+
 #ifndef VECTOR_H
 #define VECTOR_H
 #include "stdio.h"
+#include "../ps_types.h"
 
-#ifdef _WIN64
-typedef long long size_t;
-#endif
 
 #define ps_vector_declare(type) struct ps_vector_##type {\
     type* data;\
-    size_t size;\
-    size_t capacity;\
+    ps_size_t size;\
+    ps_size_t capacity;\
 };\
 typedef struct ps_vector_##type ps_vector_##type
 
@@ -40,7 +39,7 @@ typedef struct ps_vector_##type ps_vector_##type
 
 #define ps_vector_push_back(vec,val,type) {\
     if((vec).size + 1 > vec.capacity){\
-        size_t n = (vec).capacity*2;\
+        ps_size_t n = (vec).capacity*2;\
         type* m = (type*)realloc((vec).data,n*sizeof(*((vec).data)));\
         if(!m){\
             fprintf(stderr,"realloc failed");\

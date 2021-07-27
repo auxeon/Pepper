@@ -5,6 +5,10 @@
  @brief wall clock time realted utilities
 */
 
+#ifdef _WIN64
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include "ps_chronon.h"
 #include "stdbool.h"
 #include "stdlib.h"

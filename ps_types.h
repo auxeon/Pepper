@@ -12,7 +12,7 @@
 #define APPNAME "Pepper"
 #define APPW 800
 #define APPH 800
-#define FPS 30
+#define FPS 60
 #define PI 3.14159265359
 #define PS_COLOR_EMERALD 46.0/256.0, 204/256.0, 113/256.0
 

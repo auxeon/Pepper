@@ -262,7 +262,92 @@ void test5(){
     INFO("total time : %lfs", ps_clock_uptime(t));
 }
 
-void (*tests[])() = {test0,test1,test2,test3,test4,test5};
+
+// testing out miniaudio stuff 
+#define MA_NO_DECODING
+#define MA_NO_ENCODING
+#define MINIAUDIO_IMPLENTATION
+#include "../lib/miniaudio/miniaudio.h"
+
+
+#define DEVICE_FORMAT ma_format_f32
+#define DEVICE_CHANNELS 2
+#define DEVICE_SAMPLE_RATE 44100
+
+void data_callback(
+        ma_device* p_device,
+        void* p_output,
+        void* p_input,
+        ma_uint32 frame_count
+    ){
+
+    ma_waveform* p_sine_wave;
+    MA_ASSERT(p_device->playback.channels == DEVICE_CHANNELS);
+
+    p_sine_wave = (ma_waveform*)p_device->pUserData;
+    MA_ASSERT(p_sine_wave != NULL);
+
+    ma_waveform_read_pcm_frames(p_sine_wave, p_output, frame_count);
+    (void)p_input;
+    
+}
+
+void test6(){
+    INFO("[%s] : setting up miniaudio", __FUNCTION__);
+    ps_clock_data* t = ps_clock_get();
+    ps_clock_start(t);
+    
+    ma_waveform sine_wave;
+    ma_device_config device_config;
+    ma_device device;
+    ma_waveform_config sine_wave_config;
+    
+    sine_wave_config = ma_waveform_config_init(
+        DEVICE_FORMAT,
+        DEVICE_CHANNELS,
+        DEVICE_SAMPLE_RATE,
+        ma_waveform_type_sine,
+        0.2,
+        220
+    );
+    ma_waveform_init(&sine_wave_config,&sine_wave);
+    device_config = ma_device_config_init(ma_device_type_callback);
+    device_config.playback.format = DEVICE_FORMAT;
+    device_config.playback.channels = DEVICE_CHANNELS;
+    device_config.playback.sampleRate = DEVICE_SAMPLE_RATE;
+    device_config.dataCallback = data_callback;
+    device_config.pUserData = &sine_wave;
+
+    if(ma_device_init(NULL, &device_config, &device) != MA_SUCCESS){
+        printf("Failed to open playback device.\n");
+        return;
+    }
+    
+    printf("Device Name : %s\n",device.playback.name);
+    
+    if(ma_device_start(&device) != MA_SUCCESS){
+        printf("Failed to start device.\n");
+        ma_device_uninit(&device);
+        return;
+    }
+
+    printf("Press enter to quit.\n");
+    getchar();
+
+    ps_clock_stop(t);
+    INFO("total time : %lfs", ps_clock_uptime(t));
+    
+}
+
+void (*tests[])() = {
+    test0,
+    test1,
+    test2,
+    test3,
+    test4,
+    test5,
+    test6
+};
 
 int main(int argc,char** argv){
     for(int i=0;i<ps_count(tests);++i){

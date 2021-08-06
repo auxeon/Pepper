@@ -311,10 +311,10 @@ void test6(){
         220
     );
     ma_waveform_init(&sine_wave_config,&sine_wave);
-    device_config = ma_device_config_init(ma_device_type_callback);
+    device_config = ma_device_config_init(ma_device_type_playback);
     device_config.playback.format = DEVICE_FORMAT;
     device_config.playback.channels = DEVICE_CHANNELS;
-    device_config.playback.sampleRate = DEVICE_SAMPLE_RATE;
+    device_config.sampleRate = DEVICE_SAMPLE_RATE;
     device_config.dataCallback = data_callback;
     device_config.pUserData = &sine_wave;
 

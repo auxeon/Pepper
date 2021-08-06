@@ -17,10 +17,11 @@ set(CMAKE_MODULE_PATH
 
 set(COMPILER_OPTIONS
     "-Wall"
-    "flto"
     )
 set(LINKER_OPTIONS
-    ""
+    "-ldl"
+    "-lpthread"
+    "-lm"
 )
 
 add_compile_options(${COMPILE_OPTIONS})

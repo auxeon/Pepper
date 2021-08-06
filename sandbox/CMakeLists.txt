@@ -6,6 +6,7 @@ set(sandbox_SOURCES
 set(sandbox_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/../ps_types.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../lib/miniaudio"
 )
 
 add_executable(sandbox ${sandbox_SOURCES} ${sandbox_INCLUDES})
@@ -14,6 +15,7 @@ target_link_libraries(sandbox
     core
     glad
     glfw
+    miniaudio
 )
 
 target_include_directories(sandbox PUBLIC ${sandbox_INCLUDES})

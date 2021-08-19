@@ -49,7 +49,7 @@ void display_merge(void* n, ps_size_t size){
     but usage wise this is as close to using templates as we're gonna get with C99 
 */
 void test0(){
-    INFO("[%s] : using macro based generic vector types",__FUNCTION__);
+    PS_INFO("[%s] : using macro based generic vector types",__FUNCTION__);
     ps_vector_node v_node;
     ps_vector_create(v_node,node);
     ps_vector_push_back(v_node,node_create(gi_count++,0),node);
@@ -69,7 +69,7 @@ int compare_vector_node(
     performing mergesort on vector_macros version
 */
 void test1(){
-    INFO("[%s] : using mergesort on generic vector types",__FUNCTION__);
+    PS_INFO("[%s] : using mergesort on generic vector types",__FUNCTION__);
     ps_vector_node v1;
     ps_vector_create(v1,node);
     int data[] = {1,4,3,0,5,45,22};
@@ -82,13 +82,14 @@ void test1(){
     ps_vector_pop_back(v1,node);
     ps_vector_pop_back(v1,node);
     display_merge(v1.data,v1.size);
+    getchar();
 }
 
 /*
     frame rate controller
 */
 void test2(){
-    INFO("[%s] : timing stuff 60FPS",__FUNCTION__);
+    PS_INFO("[%s] : timing stuff 60FPS",__FUNCTION__);
     ps_clock_data* c = ps_clock_get();
     ps_clock_start(c);
     while(true){
@@ -102,8 +103,8 @@ void test2(){
         }
     }
     ps_clock_stop(c);
-    INFO("total time : %lfs", ps_clock_uptime(c));
-
+    PS_INFO("total time : %lfs", ps_clock_uptime(c));
+    getchar();
 }
 
 
@@ -145,7 +146,7 @@ void draw_rectangle(float xmin, float ymin, float w, float h) {
     opengl rendering with frame rate control and windowing
 */
 void test3(){
-    INFO("[%s] : opengl windowing + %dFPS",__FUNCTION__,FPS);
+    PS_INFO("[%s] : opengl windowing + %dFPS",__FUNCTION__,FPS);
 
     ps_clock_data* t = ps_clock_get();
     ps_clock_data* c = ps_clock_get();
@@ -163,7 +164,7 @@ void test3(){
     while(is_running){
         ps_graphics_window_poll_events(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-         for (int i = 0; i < 10; ++i) {
+         for (int i = 0; i < 1; ++i) {
             draw_polygon(shapes_delta[mode]);
          }
         //float dx = 0.05f;
@@ -186,7 +187,8 @@ void test3(){
     ps_graphics_release_window(window);
     ps_clock_stop(c);
     ps_clock_stop(t);
-    INFO("total time : %lfs",ps_clock_uptime(t));
+    PS_INFO("total time : %lfs",ps_clock_uptime(t));
+    getchar();
 }
 
 /*
@@ -203,22 +205,23 @@ void print_int(void* vec, ps_size_t n) {
     printf("\n");
 }
 void test4(){
-    INFO("[%s] : heapify test", __FUNCTION__);
+    PS_INFO("[%s] : heapify test", __FUNCTION__);
     ps_clock_data* t = ps_clock_get();
     ps_clock_start(t);
     int data[] = { 23, 3, 5, 4, 6, 13, 10, 9, 8, 15, 17 };
-    INFO("before heapify : \n");
+    PS_INFO("before heapify : \n");
     print_int(data, count(data));
     make_heap(data, count(data), sizeof(data[0]), cmp_int);
-    INFO("after heapify : \n");
+    PS_INFO("after heapify : \n");
     print_int(data, count(data));
     ps_clock_stop(t);
-    INFO("total time : %lfs", ps_clock_uptime(t));
+    PS_INFO("total time : %lfs", ps_clock_uptime(t));
+    getchar();
 }
 
 void test5(){
-    const int nbins = 128;
-    INFO("[%s] : FFT BARS+ %d",__FUNCTION__,nbins);
+    const int nbins = 16;
+    PS_INFO("[%s] : FFT BARS+ %d",__FUNCTION__,nbins);
     char buffer[80];
     ps_clock_data* t = ps_clock_get();
     ps_clock_start(t);
@@ -259,85 +262,74 @@ void test5(){
 
     free(samples);
     ps_clock_stop(t);
-    INFO("total time : %lfs", ps_clock_uptime(t));
+    PS_INFO("total time : %lfs", ps_clock_uptime(t));
+    getchar();
 }
 
 
-// testing out miniaudio stuff 
-#define MA_NO_DECODING
-#define MA_NO_ENCODING
-#define MINIAUDIO_IMPLENTATION
+#define MINIAUDIO_IMPLEMENTATION
 #include "../lib/miniaudio/miniaudio.h"
 
-
-#define DEVICE_FORMAT ma_format_f32
-#define DEVICE_CHANNELS 2
-#define DEVICE_SAMPLE_RATE 44100
-
-void data_callback(
-        ma_device* p_device,
-        void* p_output,
-        void* p_input,
-        ma_uint32 frame_count
-    ){
-
-    ma_waveform* p_sine_wave;
-    MA_ASSERT(p_device->playback.channels == DEVICE_CHANNELS);
-
-    p_sine_wave = (ma_waveform*)p_device->pUserData;
-    MA_ASSERT(p_sine_wave != NULL);
-
-    ma_waveform_read_pcm_frames(p_sine_wave, p_output, frame_count);
-    (void)p_input;
-    
+void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount){
+    ma_decoder* pDecoder = (ma_decoder*)pDevice->pUserData;
+    if (pDecoder == NULL) {
+        return;
+    }
+    ma_decoder_read_pcm_frames(pDecoder, pOutput, frameCount);
+    (void)pInput;
 }
+
+
 
 void test6(){
-    INFO("[%s] : setting up miniaudio", __FUNCTION__);
+    PS_INFO("[%s] : setting up miniaudio for audio playback", __FUNCTION__);
     ps_clock_data* t = ps_clock_get();
     ps_clock_start(t);
-    
-    ma_waveform sine_wave;
-    ma_device_config device_config;
+
+
+    ma_result result;
+    ma_decoder decoder;
+    ma_device_config deviceConfig;
     ma_device device;
-    ma_waveform_config sine_wave_config;
-    
-    sine_wave_config = ma_waveform_config_init(
-        DEVICE_FORMAT,
-        DEVICE_CHANNELS,
-        DEVICE_SAMPLE_RATE,
-        ma_waveform_type_sine,
-        0.2,
-        220
-    );
-    ma_waveform_init(&sine_wave_config,&sine_wave);
-    device_config = ma_device_config_init(ma_device_type_playback);
-    device_config.playback.format = DEVICE_FORMAT;
-    device_config.playback.channels = DEVICE_CHANNELS;
-    device_config.sampleRate = DEVICE_SAMPLE_RATE;
-    device_config.dataCallback = data_callback;
-    device_config.pUserData = &sine_wave;
 
-    if(ma_device_init(NULL, &device_config, &device) != MA_SUCCESS){
-        printf("Failed to open playback device.\n");
+    const char* buffer = "../../sandbox/ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3";
+    result = ma_decoder_init_file(buffer, NULL, &decoder);
+    if (result != MA_SUCCESS) {
+        PS_ERROR("decoder failed\n");
         return;
     }
-    
-    printf("Device Name : %s\n",device.playback.name);
-    
-    if(ma_device_start(&device) != MA_SUCCESS){
-        printf("Failed to start device.\n");
+
+    deviceConfig = ma_device_config_init(ma_device_type_playback);
+    deviceConfig.playback.format = decoder.outputFormat;
+    deviceConfig.playback.channels = decoder.outputChannels;
+    deviceConfig.sampleRate = decoder.outputSampleRate;
+    deviceConfig.dataCallback = data_callback;
+    deviceConfig.pUserData = &decoder;
+
+    if (ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS) {
+        PS_ERROR("Failed to open playback device.\n");
+        ma_decoder_uninit(&decoder);
+        return;
+    }
+
+    if (ma_device_start(&device) != MA_SUCCESS) {
+        PS_ERROR("Failed to start playback device.\n");
         ma_device_uninit(&device);
+        ma_decoder_uninit(&decoder);
         return;
     }
+    printf("Playing %s\n", buffer);
+    printf("Press Enter to quit...");
+    int res = getchar();
 
-    printf("Press enter to quit.\n");
-    getchar();
+    ma_device_uninit(&device);
+    ma_decoder_uninit(&decoder);
 
     ps_clock_stop(t);
-    INFO("total time : %lfs", ps_clock_uptime(t));
-    
+    PS_INFO("total time : %lfs", ps_clock_uptime(t));
+    getchar();
 }
+
 
 void (*tests[])() = {
     test0,

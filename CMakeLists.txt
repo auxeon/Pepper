@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(Pepper C CXX)
+project(Pepper C)
 
 set(pepper_SOURCES 
     "${CMAKE_CURRENT_SOURCE_DIR}/ps_single.c"
@@ -19,9 +19,7 @@ set(COMPILER_OPTIONS
     "-Wall"
     )
 set(LINKER_OPTIONS
-    "-ldl"
-    "-lpthread"
-    "-lm"
+    ""
 )
 
 add_compile_options(${COMPILE_OPTIONS})

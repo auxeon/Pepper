@@ -1,17 +1,11 @@
-project(lib C CXX)
+project(lib C)
 
 set(lib_SOURCES
-    # "${CMAKE_CURRENT_SOURCE_DIR}/ps_hashmap.c"
     ""
 )
 
 set(lib_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}"
-    #"${CMAKE_CURRENT_SOURCE_DIR}/ps_hashmap.h"
-    #"${CMAKE_CURRENT_SOURCE_DIR}/ps_logging.h"
-    #"${CMAKE_CURRENT_SOURCE_DIR}/ps_mergesort.h"
-    #"${CMAKE_CURRENT_SOURCE_DIR}/ps_vector.h"
-    #"${CMAKE_CURRENT_SOURCE_DIR}/miniaudio/miniaudio.h"
 )
 
 include_directories(${lib_INCLUDES})

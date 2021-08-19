@@ -1,4 +1,4 @@
-project(core C CXX)
+project(core C)
 
 set(core_SOURCES
     "ps_chronon.c"

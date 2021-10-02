@@ -1843,7 +1843,7 @@ typedef int ma_result;
 
 #define MA_MIN_CHANNELS                                1
 #ifndef MA_MAX_CHANNELS
-#define MA_MAX_CHANNELS                                32
+#define MA_MAX_CHANNELS                                16
 #endif
 
 

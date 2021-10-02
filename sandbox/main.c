@@ -533,8 +533,18 @@ void (*tests[])() = {
 };
 
 int main(int argc,char** argv){
-    for(int i=0;i<ps_count(tests);++i){
-        tests[i]();
+    if(argc > 1){
+        for(int t=1;t<argc;++t){
+            int n = atoi(argv[t]);
+            if(n < count(tests)){
+                tests[n]();
+            }
+        }
+    }
+    else{
+        for(int i=0;i<ps_count(tests);++i){
+            tests[i]();
+        }
     }
     return 0;
 }

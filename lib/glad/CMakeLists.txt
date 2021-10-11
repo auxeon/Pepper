@@ -1,4 +1,4 @@
-project(glad C CXX)
+project(glad C)
 
 set(glad_SOURCES
     src/glad.c

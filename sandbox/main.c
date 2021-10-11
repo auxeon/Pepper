@@ -8,14 +8,22 @@
 #ifdef _WIN64
 #define random rand
 #define _CRT_SECURE_NO_WARNINGS
+#include "Windows.h"
 #endif
 
+/*
+included Windows.h before glad.h gets included in pch.h/ps_graphics.h to deal with warning C4005: 'APIENTRY': macro redefinition 
+*/
 #include "../pch.h"
+#ifdef _WIN64
+// telling optimus to switch to nvidia graphics card instead of internal 
+// _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+#endif
 
 /*
     setting up stuff needed for test0
 */
-int gi_count = 0;
+
 
 typedef struct node{
     int val;
@@ -49,6 +57,7 @@ void display_merge(void* n, ps_size_t size){
     but usage wise this is as close to using templates as we're gonna get with C99 
 */
 void test0(){
+    int gi_count = 0;
     PS_INFO("[%s] : using macro based generic vector types",__FUNCTION__);
     ps_vector_node v_node;
     ps_vector_create(v_node,node);
@@ -93,10 +102,9 @@ void test2(){
     ps_clock_data* c = ps_clock_get();
     ps_clock_start(c);
     while(true){
-        while(ps_clock_dt(c) < (double)1.0/FPS){
-            
-        }
+        ps_clock_update(c,FPS);
         ps_clock_fps_print(c);
+        ps_clock_dt_print(c);
         ps_clock_reset(c);
         if(ps_clock_uptime(c) > 1.0){
             break;
@@ -108,37 +116,29 @@ void test2(){
 }
 
 
-double x = 0.0f;
-double y = 0.0f;
-float shapes_delta[] = {120.0f,90.0f,60.0f,45.0f,30.0f,15.0f,5.0f};
-float shapes_time[] = {1.0f,1.0f,1.0f,1.0f,1.0f,1.0f,1.0f};
-int total_shapes = sizeof(shapes_delta)/sizeof(shapes_delta[0]);
-
-void draw_polygon(float delta){
-    float angle = 360.0f;
-    float radius = 0.5f;
+/* r is the reductor to maintain state across function calls */
+void draw_polygon(ps_vec2 point, float delta, float angle, float radius, ps_color color){
     glBegin(GL_LINE_LOOP);
-    glColor3f((GLfloat)0.5f + (GLfloat)sin(x+10), (GLfloat)0.5f + (GLfloat)sin(x+20), (GLfloat)0.5f + (GLfloat)sin(x+30));
-    float dx = (float)(random()%100);
-    float dy = (float)(random()%100);
+    float alpha = ps_clamp(color.a,0.0f,1.0f);
+    glColor3f((GLfloat)sin(color.r)*alpha, (GLfloat)sin(color.g)*alpha, (GLfloat)sin(color.b)*alpha);
+    const float dx = 0.0f;
+    const float dy = 0.0f;
     for(float i=0;i<angle;i+=delta){
-        glVertex2f((GLfloat)-0.5f + dx/100.0f + radius* (GLfloat)cos(ps_deg2rad(i)), (GLfloat)-0.5 + dy/100.0f + radius* (GLfloat)sin(ps_deg2rad(i)));
+        glVertex2f((GLfloat)point.x + radius* (GLfloat)cos(ps_deg2rad(i)), (GLfloat)point.y + radius* (GLfloat)sin(ps_deg2rad(i)));
     }
     glEnd();
-    //glFlush();
-    x += 0.001f;
 }
 
-void draw_rectangle(float xmin, float ymin, float w, float h) {
-    glColor3f((GLfloat)0.5f + (GLfloat)sin(y + 10), (GLfloat)0.5f + (GLfloat)sin(y + 20), (GLfloat)0.5f + (GLfloat)sin(y + 30));
+/* r is the reductor to maintain state across function calls */
+void draw_rectangle(ps_vec2 bottom_left, ps_vec2 size, ps_color color) {
+    const float alpha = ps_clamp(color.a,0.0f,1.0f);
+    glColor3f((GLfloat)sin(color.r)*alpha, (GLfloat)sin(color.g)*alpha, (GLfloat)sin(color.b)*alpha);
     glBegin(GL_LINE_LOOP);
-    glVertex2f((GLfloat)xmin, (GLfloat)ymin);
-    glVertex2f((GLfloat)xmin+w, (GLfloat)ymin);
-    glVertex2f((GLfloat)xmin+w, (GLfloat)ymin+h);
-    glVertex2f((GLfloat)xmin, (GLfloat)ymin+h);
+    glVertex2f((GLfloat)bottom_left.x, (GLfloat)bottom_left.y);
+    glVertex2f((GLfloat)bottom_left.x+size.w, (GLfloat)bottom_left.y);
+    glVertex2f((GLfloat)bottom_left.x+size.w, (GLfloat)bottom_left.y+size.h);
+    glVertex2f((GLfloat)bottom_left.x, (GLfloat)bottom_left.y+size.h);
     glEnd();
-    //glFlush();
-    y += 0.001f;
 }
 
 
@@ -146,7 +146,13 @@ void draw_rectangle(float xmin, float ymin, float w, float h) {
     opengl rendering with frame rate control and windowing
 */
 void test3(){
-    PS_INFO("[%s] : opengl windowing + %dFPS",__FUNCTION__,FPS);
+    if (FPS){
+        PS_INFO("[%s] : opengl windowing + %dFPS",__FUNCTION__,FPS);
+    }
+    else{
+        PS_INFO("[%s] : FPS set to 0",__FUNCTION__);
+        PS_INFO("[%s] : opengl windowing + MAX FPS",__FUNCTION__);
+    }
 
     ps_clock_data* t = ps_clock_get();
     ps_clock_data* c = ps_clock_get();
@@ -157,27 +163,43 @@ void test3(){
     ps_graphics_init(window,APPNAME,APPW,APPH);
     bool is_running = true;
 
+    ps_color color = (ps_color){PS_COLOR_EMERALD, .a=1.0f};
+    float shapes_delta[] = {120.0f,90.0f,60.0f,45.0f,30.0f,15.0f,5.0f};
+    float shapes_time[] = {1.0f,1.0f,1.0f,1.0f,1.0f,1.0f,1.0f};
+    int total_shapes = sizeof(shapes_delta)/sizeof(shapes_delta[0]);
+
     int mode = 0;
     float delta = shapes_delta[mode];
     float duration = shapes_time[mode];
     char buffer[80];
+
+    PS_INFO("%s opengl vendor\n",(char*)glGetString(GL_VENDOR));
     while(is_running){
         ps_graphics_window_poll_events(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-         for (int i = 0; i < 1; ++i) {
-            draw_polygon(shapes_delta[mode]);
+        for (int i = 0; i < 1; ++i) {
+            draw_polygon(
+                (ps_vec2){
+                    .x = -0.5f + (rand()%100)/100.0f,
+                    .y = -0.5f + (rand()%100)/100.0f
+                },
+                shapes_delta[mode],
+                360.0, 
+                0.5, 
+                color
+            );
          }
-        //float dx = 0.05f;
-        //float pad = 0.0f;
-        //for (int r = 0; r < 40; ++r) {
-        //    draw_rectangle(-1.0f+(r*(dx+pad)), -1.0f, 0.05f, rand()%10/20.0f);
-        //}
+        float dx = 0.05f;
+        float pad = 0.0f;
+        for (int r = 0; r < 40; ++r) {
+           draw_rectangle((ps_vec2){.x = -1.0f+(r*(dx+pad)), .y = -1.0f}, (ps_vec2){.x = 0.05f, .y = rand()%10/20.0f}, color);
+        }
         ps_clock_update(c,FPS);
-        sprintf(buffer, "[%s] (%d FPS)",APPNAME, (int)ceil(1.0 / ps_clock_dt(c)));
+        sprintf(buffer, "[%s] (%0.3lf FPS)",APPNAME, ps_clock_fps(c));
         ps_graphics_window_set_title(window, buffer);
         ps_clock_reset(c);
         if(ps_clock_uptime(c) > shapes_time[mode]){
-            mode = (mode+1)%total_shapes;
+            mode = (mode+1)%(total_shapes);
             ps_clock_reset_uptime(c);
         }
         ps_graphics_window_swap_buffers(window);
@@ -245,12 +267,12 @@ void test5(){
         int bars = nbins;
         float dx = 2.0f/(float)(bars+1);
         float pad = 0.0f;
+        ps_color color = (ps_color){.r=(float)(rand()/100), .g=(float)(rand()/100), .b=(float)(rand()/100), .a=1.0f};
         for (int r = 0; r < bars; ++r) {
-            draw_rectangle(-1.0f+dx/2+(r*(dx+pad)), -1.0f, dx, rand()%50/30.0f + samples[r]);
+            draw_rectangle((ps_vec2){.x = -1.0f+dx/2+(r*(dx+pad)), .y = -1.0f}, (ps_vec2){.x = dx, .y = rand()%50/30.0f + samples[r]}, color);
         }
-
         ps_clock_update(t,FPS);
-        sprintf(buffer, "[%s] (%d FPS)",APPNAME, (int)ceil(1.0 / ps_clock_dt(t)));
+        sprintf(buffer, "[%s] (%0.3lf FPS)",APPNAME, ps_clock_fps(t));
         ps_graphics_window_set_title(window, buffer);
         ps_clock_reset(t);
         ps_graphics_window_swap_buffers(window);
@@ -289,7 +311,6 @@ void data_callback_test6(ma_device* pDevice, void* output, const void* input, ma
 void test6(){
     PS_INFO("[%s] : setting up miniaudio for audio playback", __FUNCTION__);
     ps_clock_data* t = ps_clock_get();
-    t6 = t;
     ps_clock_start(t);
 
 
@@ -298,7 +319,7 @@ void test6(){
     ma_device_config deviceConfig;
     ma_device device;
 
-    const char* buffer = "../../sandbox/ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3";
+    const char* buffer = "../../../sandbox/ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3";
     result = ma_decoder_init_file(buffer, NULL, &decoder);
     if (result != MA_SUCCESS) {
         PS_ERROR("decoder failed\n");
@@ -441,7 +462,7 @@ void test7() {
     ma_uint32 iDecoder;
 
     // play 2 source files and then fade back and forth across them s
-    const char* buffer[] = { "../../sandbox/ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3", "../../sandbox/daft_punk_get_lucky.mp3" };
+    const char* buffer[] = { "../../../sandbox/ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3", "../../../sandbox/daft_punk_get_lucky.mp3" };
 
     g_decoderCount = 2;
     g_pDecoders = (ma_decoder*)malloc(sizeof(*g_pDecoders) * g_decoderCount);
@@ -504,7 +525,9 @@ void test7() {
         return;
     }
 
-    PS_ERROR("Waiting for playback to complete...\n");
+    printf("Playing [ %s , %s ]\n", buffer[0], buffer[1]);
+    PS_INFO("Waiting for playback to complete...\n");
+
     ma_event_wait(&g_stopEvent);
 
     /* Getting here means the audio thread has signaled that the device should be stopped. */
@@ -521,18 +544,23 @@ void test7() {
     getchar();
 }
 
-void (*tests[])() = {
-    test0,
-    test1,
-    test2,
-    test3,
-    test4,
-    test5,
-    test6,
-    test7
-};
+void test8() {
+    
+}
 
 int main(int argc,char** argv){
+
+    void (*tests[])() = {
+        test0,
+        test1,
+        test2,
+        test3,
+        test4,
+        test5,
+        test6,
+        test7
+    };
+
     if(argc > 1){
         for(int t=1;t<argc;++t){
             int n = atoi(argv[t]);

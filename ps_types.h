@@ -13,28 +13,39 @@
 #define APPW 800
 #define APPH 800
 #define FPS 60
+#define MAXFPS 1000
 #define PI 3.14159265359
-#define PS_COLOR_EMERALD 46.0/256.0, 204/256.0, 113/256.0
+#define PS_COLOR_EMERALD 46.0/256.0, 204/256.0, 113/256.0, 0.5
 
 // macros
-#define ps_count(x) sizeof(x)/sizeof(x[0])
-#define ps_deg2rad(x) PI/180.0f*x
-#define ps_rad2deg(x) 180.0/PI*x
+#define ps_count(x) sizeof((x))/sizeof((x)[0])
+#define ps_deg2rad(x) PI/180.0f*(x)
+#define ps_rad2deg(x) 180.0/PI*(x)
+#define ps_max(a,b) (((a) > (b)) ? (a) : (b))
+#define ps_min(a,b) (((a) < (b)) ? (a) : (b))
+#define ps_clamp(v,lo,hi) (((v) < (lo))? (lo) : ((v) > (hi))? (hi) : (v))
+
 
 // typedefs
-typedef struct ps_point{
-    float x;
-    float y;
-    float z;
-    float w;
-}ps_point;
+typedef struct ps_vec2{
+    union {float x, u, s, w;};
+    union {float y, v, t, h;};
+}ps_vec2;
 
-typedef struct ps_color{
-    float r;
-    float g;
-    float b;
-    float a;
-}ps_color;
+typedef struct ps_vec3{
+    union {float x, r, s;};
+    union {float y, g, t;};
+    union {float z, b, p;};
+}ps_vec3;
+
+typedef struct ps_vec4{
+    union {float x, r, s;};
+    union {float y, g, t;};
+    union {float z, b, p;};
+    union {float w, a, q;};
+}ps_vec4;
+
+typedef ps_vec4 ps_color;   
 
 typedef long long ps_size_t;
 

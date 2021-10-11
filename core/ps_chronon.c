@@ -8,6 +8,8 @@
 #if defined(_WIN32) || defined(_WIN64)
 #define _CRT_SECURE_NO_WARNINGS
 #include "Windows.h"
+#elif defined(__APPLE__)
+#include "mach/mach_time.h"
 #endif
 
 #include "ps_chronon.h"
@@ -67,7 +69,7 @@ ps_clock_data* ps_clock_get(){
         mach_timebase_info_data_t info_data;
         mach_timebase_info(&info_data);
         /*beware info_data is a struct of uint32_t numer, denom - division result will be double but casting it to uint64_t*/
-        clock->freq = (uint64_t)((info.denom * 1e9) / info.numer);
+        clock->freq = (uint64_t)((info_data.denom * 1e9) / info_data.numer);
 
 #else
         clock->freq = (uint64_t)1000;

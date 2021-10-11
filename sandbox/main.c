@@ -319,7 +319,7 @@ void test6(){
     ma_device_config deviceConfig;
     ma_device device;
 
-    const char* buffer = "../../../sandbox/ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3";
+    const char* buffer = "ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3";
     result = ma_decoder_init_file(buffer, NULL, &decoder);
     if (result != MA_SUCCESS) {
         PS_ERROR("decoder failed\n");
@@ -462,7 +462,7 @@ void test7() {
     ma_uint32 iDecoder;
 
     // play 2 source files and then fade back and forth across them s
-    const char* buffer[] = { "../../../sandbox/ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3", "../../../sandbox/daft_punk_get_lucky.mp3" };
+    const char* buffer[] = { "ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3", "daft_punk_get_lucky.mp3" };
 
     g_decoderCount = 2;
     g_pDecoders = (ma_decoder*)malloc(sizeof(*g_pDecoders) * g_decoderCount);
@@ -543,9 +543,39 @@ void test7() {
     PS_INFO("total time : %lfs", ps_clock_uptime(t));
     getchar();
 }
+bool update_fn(int* t, int* i) {
+    *i += 1;
+    return *i==*t;
+}
 
+bool update_noop_fn(int* t, int* i) {
+    return *i==*t;
+}
+
+int msg_fn(int* t, int* i) {
+    char buffer[40];
+    int n = sprintf(buffer, "(%d/%d)",*i,*t);
+    printf("%s",buffer);
+    fflush(stdout);
+    return n;
+}
 void test8() {
-    
+    PS_INFO("[%s] : testing out progress bar", __FUNCTION__);
+    ps_clock_data* t = ps_clock_get();
+    ps_clock_start(t);
+    int total = 10;
+    int index = 0;
+    int nback = 0;
+    while(!progress(&total, &index, &nback, update_fn, msg_fn)) {
+        while(ps_clock_uptime(t) < 0.2f){
+            
+        }
+        ps_clock_reset_uptime(t);
+    }
+    ps_clock_stop(t);
+    printf("\n");
+    PS_INFO("total time : %lfs", ps_clock_uptime(t));
+    getchar();
 }
 
 int main(int argc,char** argv){
@@ -558,7 +588,8 @@ int main(int argc,char** argv){
         test4,
         test5,
         test6,
-        test7
+        test7,
+        test8
     };
 
     if(argc > 1){

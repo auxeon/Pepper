@@ -26,3 +26,8 @@ set_target_properties(sandbox
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
+
+add_custom_command(TARGET sandbox POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/daft_punk_get_lucky.mp3 ${CMAKE_BINARY_DIR}/bin/daft_punk_get_lucky.mp3
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3 ${CMAKE_BINARY_DIR}/bin/ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3
+)

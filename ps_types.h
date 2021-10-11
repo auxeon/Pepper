@@ -15,7 +15,7 @@
 #define FPS 60
 #define MAXFPS 1000
 #define PI 3.14159265359
-#define PS_COLOR_EMERALD 46.0/256.0, 204/256.0, 113/256.0, 0.5
+#define PS_COLOR_EMERALD 46.0/256.0, 204/256.0, 113/256.0
 
 // macros
 #define ps_count(x) sizeof((x))/sizeof((x)[0])

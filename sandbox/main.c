@@ -5,6 +5,8 @@
 @desc   sandbox launcher and tests
 */
 
+#include "immintrin.h"
+
 #ifdef _WIN64
 #define random rand
 #define _CRT_SECURE_NO_WARNINGS
@@ -578,6 +580,62 @@ void test8() {
     getchar();
 }
 
+
+
+void add_rand_arrays_simple(int* vin_0, int vsz_0, int* vin_1, int vsz_1, int* vout_0) {
+    for(int i=0; i<vsz_1; ++i) {
+        vout_0[i] = vin_0[i] + vin_1[i];
+    }
+}
+
+void add_rand_arrays_noindexing(int* vin_0, int vsz_0, int* vin_1, int vsz_1, int* vout_0) {
+    int* const end = vout_0 + vsz_1;
+    while(vout_0<end){
+        *(vout_0++) = *(vin_0++) + *(vin_1++);
+    }
+}
+
+void add_rand_arrays_vectorized(int* vin_0, int vsz_0, int* vin_1, int vsz_1, int* vout_0) {
+    int i=0;
+    for(;i+4<vsz_1;i+=4) {
+         _mm_storeu_si128((__m128i*)&vout_0[i], _mm_add_epi32(_mm_loadu_si32((__m128i*)&vin_0[i]),_mm_loadu_si32((__m128i*)&vin_1[i])));
+    }
+    for(;i<vsz_1;++i){
+        vout_0[i] = vin_0[i] + vin_1[i];
+    }
+}
+
+int* populate_randints(int vsz_0) {
+    int* vout_0 = (int*)malloc(sizeof(int)*vsz_0);
+    for(int i=0; i<vsz_0; ++i) {
+        vout_0[i] = rand()%1000;
+    }
+    return vout_0;
+}
+
+void print_array(int* vin_0, int vsz_0) {
+    for(int i=0; i<vsz_0; ++i) {
+        printf("%d ",vin_0[i]);
+    }
+}
+void test9() {
+    PS_INFO("[%s] : vectorized addition test", __FUNCTION__);
+    ps_clock_data* t = ps_clock_get();
+    ps_clock_start(t);
+    int sz = 1000000000;
+    int* v0 = NULL;
+    int* v1 = NULL;
+    int* v2 = (int*)calloc(sz, sizeof(int));
+    v0 = populate_randints(sz);
+    v1 = populate_randints(sz);
+    // add_rand_arrays_simple(v0,sz,v1,sz,v2);
+    // add_rand_arrays_noindexing(v0,sz,v1,sz,v2);
+    add_rand_arrays_vectorized(v0,sz,v1,sz,v2);
+    ps_clock_stop(t);
+    printf("\n");
+    PS_INFO("total time : %lfs", ps_clock_uptime(t));
+}
+
 int main(int argc,char** argv){
 
     void (*tests[])() = {
@@ -589,7 +647,8 @@ int main(int argc,char** argv){
         test5,
         test6,
         test7,
-        test8
+        test8,
+        test9
     };
 
     if(argc > 1){

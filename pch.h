@@ -22,5 +22,5 @@
 #include "lib/ps_mergesort.h"
 #include "lib/ps_progress.h"
 #include "lib/ps_vector.h"
-#include "../ps_types.h"
+#include "ps_types.h"
 #endif 

@@ -19,6 +19,18 @@ target_link_libraries(sandbox
 
 target_include_directories(sandbox PUBLIC ${sandbox_INCLUDES})
 
+
+set(COMPILER_OPTIONS
+    "-Wall"
+    "-O3"
+    )
+set(LINKER_OPTIONS
+    "-mavx"
+)
+
+add_compile_options(${COMPILE_OPTIONS})
+add_link_options(${LINKER_OPTIONS})
+
 set_target_properties(sandbox
     PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${sandbox_INCLUDES}"
@@ -28,6 +40,7 @@ set_target_properties(sandbox
     RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin"
     RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin"
 )
+
 
 add_custom_command(TARGET sandbox POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/daft_punk_get_lucky.mp3 ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/bin/daft_punk_get_lucky.mp3

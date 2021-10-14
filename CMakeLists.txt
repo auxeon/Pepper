@@ -17,9 +17,10 @@ set(CMAKE_MODULE_PATH
 
 set(COMPILER_OPTIONS
     "-Wall"
+    "-O3"
     )
 set(LINKER_OPTIONS
-    ""
+    "-mavx"
 )
 
 add_compile_options(${COMPILE_OPTIONS})

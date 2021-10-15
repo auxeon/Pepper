@@ -174,28 +174,34 @@ void test3(){
     float delta = shapes_delta[mode];
     float duration = shapes_time[mode];
     char buffer[80];
-
     PS_INFO("%s opengl vendor\n",(char*)glGetString(GL_VENDOR));
+    ps_vec2 pos = (ps_vec2){
+        .x=0.0f,
+        .y=0.0f
+    };
     while(is_running){
         ps_graphics_window_poll_events(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        for (int i = 0; i < 1; ++i) {
+        for (int i = 1; i < 10; ++i) {
+
+            pos = (ps_vec2){
+                .x=cos(ps_clock_uptime(t)*(i+1)*0.5f + 10*i*PI/180.0f)*0.2f,
+                .y=sin(ps_clock_uptime(t)*(i+1)*0.5f + 10*i*PI/180.0f)*0.2f
+            };
+
             draw_polygon(
-                (ps_vec2){
-                    .x = -0.5f + (rand()%100)/100.0f,
-                    .y = -0.5f + (rand()%100)/100.0f
-                },
+                pos,
                 shapes_delta[mode],
                 360.0, 
-                0.5, 
+                0.05, 
                 color
             );
          }
-        float dx = 0.05f;
-        float pad = 0.0f;
-        for (int r = 0; r < 40; ++r) {
-           draw_rectangle((ps_vec2){.x = -1.0f+(r*(dx+pad)), .y = -1.0f}, (ps_vec2){.x = 0.05f, .y = rand()%10/20.0f}, color);
-        }
+        // float dx = 0.05f;
+        // float pad = 0.0f;
+        // for (int r = 0; r < 40; ++r) {
+        //    draw_rectangle((ps_vec2){.x = -1.0f+(r*(dx+pad)), .y = -1.0f}, (ps_vec2){.x = 0.05f, .y = rand()%10/20.0f}, color);
+        // }
         ps_clock_update(c,FPS);
         sprintf(buffer, "[%s] (%0.3lf FPS)",APPNAME, ps_clock_fps(c));
         ps_graphics_window_set_title(window, buffer);
@@ -588,19 +594,24 @@ void add_rand_arrays_simple(int* vin_0, int vsz_0, int* vin_1, int vsz_1, int* v
     }
 }
 
-void add_rand_arrays_noindexing(int* vin_0, int vsz_0, int* vin_1, int vsz_1, int* vout_0) {
+void add_rand_arrays_noindexing(int* restrict vin_0, int vsz_0, int* restrict vin_1, int vsz_1, int* restrict vout_0) {
     int* const end = vout_0 + vsz_1;
     while(vout_0<end){
         *(vout_0++) = *(vin_0++) + *(vin_1++);
     }
 }
 
-void add_rand_arrays_vectorized(int* vin_0, int vsz_0, int* vin_1, int vsz_1, int* vout_0) {
-    int i=0;
-    for(;i+4<vsz_1;i+=4) {
-         _mm_storeu_si128((__m128i*)&vout_0[i], _mm_add_epi32(_mm_loadu_si32((__m128i*)&vin_0[i]),_mm_loadu_si32((__m128i*)&vin_1[i])));
+void add_rand_arrays_vectorized(int* restrict vin_0, int vsz_0, int* restrict vin_1, int vsz_1, int* restrict vout_0) {
+    const int aligned = vsz_1 - vsz_1 % 4;
+    for (int i = 0; i < aligned; i+=4) {
+        _mm_storeu_si128((__m128i_u*)&vout_0[i], 
+            _mm_add_epi32(
+                _mm_loadu_si128((__m128i_u*)&vin_0[i]), 
+                _mm_loadu_si128((__m128i_u*)&vin_1[i])
+            )
+        );
     }
-    for(;i<vsz_1;++i){
+    for (int i = aligned; i < vsz_1; ++i) {
         vout_0[i] = vin_0[i] + vin_1[i];
     }
 }
@@ -615,25 +626,30 @@ int* populate_randints(int vsz_0) {
 
 void print_array(int* vin_0, int vsz_0) {
     for(int i=0; i<vsz_0; ++i) {
-        printf("%d ",vin_0[i]);
+        printf("%d\n",vin_0[i]);
     }
 }
 void test9() {
     PS_INFO("[%s] : vectorized addition test", __FUNCTION__);
     ps_clock_data* t = ps_clock_get();
-    ps_clock_start(t);
     int sz = 1000000000;
     int* v0 = NULL;
     int* v1 = NULL;
     int* v2 = (int*)calloc(sz, sizeof(int));
     v0 = populate_randints(sz);
     v1 = populate_randints(sz);
+    ps_clock_start(t);
+    // across the vectorized and noindexing versions there is no difference in speed if i used restrict and -O3
     // add_rand_arrays_simple(v0,sz,v1,sz,v2);
-    // add_rand_arrays_noindexing(v0,sz,v1,sz,v2);
-    add_rand_arrays_vectorized(v0,sz,v1,sz,v2);
+    // add_rand_arrays_vectorized(v0,sz,v1,sz,v2);
+    add_rand_arrays_noindexing(v0,sz,v1,sz,v2);
     ps_clock_stop(t);
     printf("\n");
     PS_INFO("total time : %lfs", ps_clock_uptime(t));
+    printf("\n");
+    // print_array(v0,sz);
+    // print_array(v1,sz);
+    // print_array(v2,sz);
 }
 
 int main(int argc,char** argv){

@@ -19,6 +19,7 @@
 #include "core/ps_graphics.h"
 #include "lib/ps_heap.h"
 #include "lib/ps_logging.h"
+#include "lib/ps_math.h"
 #include "lib/ps_mergesort.h"
 #include "lib/ps_progress.h"
 #include "lib/ps_vector.h"

@@ -301,6 +301,10 @@ void test5(){
 #include "../lib/miniaudio/miniaudio.h"
 
 #define C_COUNT 2
+#define FALSE 0
+#define TRUE 1
+#define SUCCESS 0
+#define ERROR -1
 
 ps_clock_data* t6;
 
@@ -329,7 +333,7 @@ void test6(){
 
     const char* buffer = "ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3";
     result = ma_decoder_init_file(buffer, NULL, &decoder);
-    if (result != MA_SUCCESS) {
+    if (result != SUCCESS) {
         PS_ERROR("decoder failed\n");
         return;
     }
@@ -341,13 +345,13 @@ void test6(){
     deviceConfig.dataCallback = data_callback_test6;
     deviceConfig.pUserData = &decoder;
 
-    if (ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS) {
+    if (ma_device_init(NULL, &deviceConfig, &device) != SUCCESS) {
         PS_ERROR("Failed to open playback device.\n");
         ma_decoder_uninit(&decoder);
         return;
     }
 
-    if (ma_device_start(&device) != MA_SUCCESS) {
+    if (ma_device_start(&device) != SUCCESS) {
         PS_ERROR("Failed to start playback device.\n");
         ma_device_uninit(&device);
         ma_decoder_uninit(&decoder);
@@ -373,6 +377,7 @@ For simplicity, this example requires the device to use floating point samples.
 #define CHANNEL_COUNT   2
 #define SAMPLE_RATE     48000
 
+
 ma_uint32   g_decoderCount;
 ma_decoder* g_pDecoders;
 ma_bool32* g_pDecodersAtEnd;
@@ -383,12 +388,12 @@ ma_bool32 are_all_decoders_at_end()
 {
     ma_uint32 iDecoder;
     for (iDecoder = 0; iDecoder < g_decoderCount; ++iDecoder) {
-        if (g_pDecodersAtEnd[iDecoder] == MA_FALSE) {
-            return MA_FALSE;
+        if (g_pDecodersAtEnd[iDecoder] == FALSE) {
+            return FALSE;
         }
     }
 
-    return MA_TRUE;
+    return TRUE;
 }
 
 ma_uint32 read_and_mix_pcm_frames_f32(ma_decoder* pDecoder, float* pOutputF32, ma_uint32 frameCount)
@@ -442,7 +447,7 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
         if (!g_pDecodersAtEnd[iDecoder]) {
             ma_uint32 framesRead = read_and_mix_pcm_frames_f32(&g_pDecoders[iDecoder], pOutputF32, frameCount);
             if (framesRead < frameCount) {
-                g_pDecodersAtEnd[iDecoder] = MA_TRUE;
+                g_pDecodersAtEnd[iDecoder] = TRUE;
             }
         }
     }
@@ -485,7 +490,7 @@ void test7() {
     decoderConfig = ma_decoder_config_init(SAMPLE_FORMAT, CHANNEL_COUNT, SAMPLE_RATE);
     for (iDecoder = 0; iDecoder < g_decoderCount; ++iDecoder) {
         result = ma_decoder_init_file(buffer[iDecoder], &decoderConfig, &g_pDecoders[iDecoder]);
-        if (result != MA_SUCCESS) {
+        if (result != SUCCESS) {
             ma_uint32 iDecoder2;
             for (iDecoder2 = 0; iDecoder2 < iDecoder; ++iDecoder2) {
                 ma_decoder_uninit(&g_pDecoders[iDecoder2]);
@@ -496,7 +501,7 @@ void test7() {
             PS_ERROR("Failed to load %s.\n", buffer[iDecoder]);
             return;
         }
-        g_pDecodersAtEnd[iDecoder] = MA_FALSE;
+        g_pDecodersAtEnd[iDecoder] = FALSE;
     }
 
 
@@ -508,7 +513,7 @@ void test7() {
     deviceConfig.dataCallback = data_callback;
     deviceConfig.pUserData = NULL;
 
-    if (ma_device_init(NULL, &deviceConfig, &device) != MA_SUCCESS) {
+    if (ma_device_init(NULL, &deviceConfig, &device) != SUCCESS) {
         for (iDecoder = 0; iDecoder < g_decoderCount; ++iDecoder) {
             ma_decoder_uninit(&g_pDecoders[iDecoder]);
         }
@@ -521,7 +526,7 @@ void test7() {
     ma_event_init(&g_stopEvent);
 
     /* Now we start playback and wait for the audio thread to tell us to stop. */
-    if (ma_device_start(&device) != MA_SUCCESS) {
+    if (ma_device_start(&device) != SUCCESS) {
         ma_device_uninit(&device);
         for (iDecoder = 0; iDecoder < g_decoderCount; ++iDecoder) {
             ma_decoder_uninit(&g_pDecoders[iDecoder]);
@@ -650,6 +655,10 @@ void test9() {
     // print_array(v0,sz);
     // print_array(v1,sz);
     // print_array(v2,sz);
+}
+
+void test10() {
+    return;
 }
 
 int main(int argc,char** argv){

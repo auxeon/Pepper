@@ -33,8 +33,7 @@ typedef struct node{
 }node;
 
 node node_create(int val, int id){
-    node n = {.val=val, .id=id};
-    return n;
+    return (node){val, id};
 }
 /*
     essential to setup the struct needed for vector ops using macros
@@ -142,7 +141,21 @@ void draw_rectangle(ps_vec2 bottom_left, ps_vec2 size, ps_color color) {
     glVertex2f((GLfloat)bottom_left.x, (GLfloat)bottom_left.y+size.h);
     glEnd();
 }
+/* draw in the screen space*/
+void draw_rect(ps_vec2 bottom_left, ps_vec2 top_right, ps_color color){
 
+    bottom_left.x = (bottom_left.x/(float)APPW)*2.0f - 1.0f;
+    bottom_left.y = (bottom_left.y/(float)APPH)*2.0f - 1.0f;
+    top_right.x = (top_right.x/(float)APPW)*2.0f - 1.0f;
+    top_right.y = (top_right.y/(float)APPH)*2.0f - 1.0f;
+
+    draw_rectangle(
+        bottom_left,
+        (ps_vec2){top_right.x-bottom_left.x,top_right.y-bottom_left.y},
+        color
+    );
+
+}
 
 /*
     opengl rendering with frame rate control and windowing
@@ -656,9 +669,153 @@ void test9() {
     // print_array(v1,sz);
     // print_array(v2,sz);
 }
+/* 
+    input boxes
+    input nboxes
+    input confs
+    input nconfs
+    output boxes
+    output nboxes
+*/
 
+float get_iou(ps_vec4 b0, ps_vec4 b1){
+
+    float a1 = (b0.z - b0.x) * (b0.w - b0.y);
+    float a2 = (b1.z - b1.x) * (b1.w - b1.y);
+
+    float xx1 = ps_max(b0.x,b1.x);
+    float yy1 = ps_max(b0.y,b1.y);
+    float xx2 = ps_min(b0.z,b1.z);
+    float yy2 = ps_min(b0.w,b1.w);
+
+    float w = ps_max(xx2 - xx1,0.0f);
+    float h = ps_max(yy2 - yy1,0.0f);
+
+    float i = w * h;
+    float u = a1 + a1 - i;
+
+    float iou = i/u;
+    return iou;
+}
+
+float* nms_cmp_confs = NULL;
+bool nms_cmp(const void* a, const void* b){
+    return nms_cmp_confs[(*(int*)b)] < nms_cmp_confs[(*(int*)a)];
+}
+
+typedef struct nmsnode{
+    int i;
+    float c;
+} nmsnode;
+
+nmsnode nmsnode_create(int i, float c){
+    return (nmsnode){i,c};
+}
+ps_vector_declare(nmsnode);
+
+void nmsc(
+    ps_vec4* i_b, 
+    int i_nb, 
+    float* i_c, 
+    int i_nc,
+    float i_cthresh,
+    float i_nmsthresh,
+    int* o_index, 
+    int* o_nindex
+    ){
+
+    ps_vector_nmsnode v0;
+    ps_vector_create(v0, nmsnode);
+    for(int i=0;i<i_nc;++i){
+        if(i_c[i] > i_cthresh){
+            ps_vector_push_back(v0, nmsnode_create(i,i_c[i]), nmsnode);
+        }
+    }
+
+    for(int i=0;i<i_nc;++i){
+        printf("%d (%f)\n",i,ps_vector_at(v0,i).c);
+    }
+
+
+}
+
+/* trying out non maximum suppression */
 void test10() {
-    return;
+   if (FPS){
+        PS_INFO("[%s] : opengl windowing + %dFPS",__FUNCTION__,FPS);
+    }
+    else{
+        PS_INFO("[%s] : FPS set to 0",__FUNCTION__);
+        PS_INFO("[%s] : opengl windowing + MAX FPS",__FUNCTION__);
+    }
+
+    ps_clock_data* t = ps_clock_get();
+    ps_clock_data* c = ps_clock_get();
+    ps_clock_start(t);
+    ps_clock_start(c);
+    
+    ps_graphics_window* window = ps_graphics_get_window();
+    ps_graphics_init(window,APPNAME,APPW,APPH);
+    bool is_running = true;
+
+    ps_color color = (ps_color){PS_COLOR_EMERALD, .a=1.0f};
+
+    char buffer[80];
+    PS_INFO("%s opengl vendor\n",(char*)glGetString(GL_VENDOR));
+
+    ps_vec4 boxes[] = {
+        {10,10,40,50},
+        {20,30,80,110},
+        {40,50,90,110},
+        {50,60,100,100}
+    };
+
+    float confs[] = {
+        0.55f,
+        0.65f,
+        0.78f,
+        0.78f
+    };
+
+    int* outindexes = (int*)malloc(sizeof(int)*ps_count(confs));
+    int outn = ps_count(confs);
+
+    nmsc(
+        boxes,
+        ps_count(boxes),
+        confs,
+        ps_count(confs),
+        0.6f,
+        0.7f,
+        outindexes,
+        &outn
+    );
+
+    free(outindexes);
+
+    while(is_running){
+        ps_graphics_window_poll_events(window);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        for (int i = 0; i < ps_count(boxes); ++i) {
+            draw_rect(
+                (ps_vec2){boxes[i].x, boxes[i].y},
+                (ps_vec2){boxes[i].z, boxes[i].z},
+                (ps_color){color.r,color.g,color.b,confs[i]*confs[i]*confs[i]}
+            );
+         }
+
+        ps_clock_update(c,FPS);
+        sprintf(buffer, "[%s] (%0.3lf FPS)",APPNAME, ps_clock_fps(c));
+        ps_graphics_window_set_title(window, buffer);
+        ps_clock_reset(c);
+        ps_graphics_window_swap_buffers(window);
+        is_running = !ps_graphics_window_should_close(window);
+    }
+    ps_graphics_destroy(window);
+    ps_graphics_release_window(window);
+    ps_clock_stop(c);
+    ps_clock_stop(t);
+    PS_INFO("total time : %lfs",ps_clock_uptime(t));
 }
 
 int main(int argc,char** argv){
@@ -673,7 +830,8 @@ int main(int argc,char** argv){
         test6,
         test7,
         test8,
-        test9
+        test9,
+        test10
     };
 
     if(argc > 1){

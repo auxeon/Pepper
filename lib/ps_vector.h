@@ -38,7 +38,7 @@ typedef struct ps_vector_##type ps_vector_##type
 #define ps_vector_back(vec) (vec).data[(vec).size-1]
 
 #define ps_vector_push_back(vec,val,type) {\
-    if((vec).size + 1 > vec.capacity){\
+    if((vec).size + 1 > (vec).capacity){\
         ps_size_t n = (vec).capacity*2;\
         type* m = (type*)realloc((vec).data,n*sizeof(*((vec).data)));\
         if(!m){\
@@ -48,8 +48,8 @@ typedef struct ps_vector_##type ps_vector_##type
         (vec).data = m;\
         (vec).capacity = n;\
     }\
-    vec.data[vec.size] = val;\
-    vec.size += 1;\
+    (vec).data[(vec).size] = (val);\
+    (vec).size += 1;\
 }
 
 #define ps_vector_pop_back(vec,type){\

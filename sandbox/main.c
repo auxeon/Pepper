@@ -732,7 +732,7 @@ void nmsc(
         }
     }
 
-    for(int i=0;i<i_nc;++i){
+    for(int i=0;i<v0.size;++i){
         printf("%d (%f)\n",i,ps_vector_at(v0,i).c);
     }
 

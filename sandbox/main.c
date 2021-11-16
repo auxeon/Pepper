@@ -1,7 +1,7 @@
 /*
 @author Abhikalp Unakal
 @date   08 june 2021
-@file   main.c
+@file   main.c  
 @desc   sandbox launcher and tests
 */
 
@@ -330,8 +330,6 @@ void data_callback_test6(ma_device* pDevice, void* output, const void* input, ma
     // That(void) casting construct is a no - op that makes the compiler unused variable warning go away
     (void)input;
 }
-
-
 
 void test6(){
     PS_INFO("[%s] : setting up miniaudio for audio playback", __FUNCTION__);
@@ -698,20 +696,27 @@ float get_iou(ps_vec4 b0, ps_vec4 b1){
     return iou;
 }
 
-float* nms_cmp_confs = NULL;
-bool nms_cmp(const void* a, const void* b){
-    return nms_cmp_confs[(*(int*)b)] < nms_cmp_confs[(*(int*)a)];
-}
+
 
 typedef struct nmsnode{
     int i;
     float c;
 } nmsnode;
 
+ps_vector_declare(nmsnode);
+ps_vector_declare(ps_vec4);
+
+int nms_cmp(const void* a, const void* b){
+    return (*(nmsnode*)a).c < (*(nmsnode*)b).c;
+}
+
+void no_op(ps_vector_nmsnode a){
+
+}
+
 nmsnode nmsnode_create(int i, float c){
     return (nmsnode){i,c};
 }
-ps_vector_declare(nmsnode);
 
 void nmsc(
     ps_vec4* i_b, 
@@ -724,19 +729,54 @@ void nmsc(
     int* o_nindex
     ){
 
-    ps_vector_nmsnode v0;
+    ps_vector_nmsnode v0; 
+    ps_vector_nmsnode v1; 
+
     ps_vector_create(v0, nmsnode);
+    ps_vector_create(v1, nmsnode);
+
+    // trim all the confs that are less than 0.65
     for(int i=0;i<i_nc;++i){
         if(i_c[i] > i_cthresh){
             ps_vector_push_back(v0, nmsnode_create(i,i_c[i]), nmsnode);
         }
     }
 
-    for(int i=0;i<v0.size;++i){
-        printf("%d (%f)\n",i,ps_vector_at(v0,i).c);
+    // sort based on highest confs first
+    ps_mergesort(v0.data,0,v0.size-1,sizeof(nmsnode),nms_cmp);
+
+    // dump it all out 
+    // for(int i=0;i<v0.size;++i){
+    //     printf("%d (%f)\n",i,ps_vector_at(v0,i).c);
+    // }
+
+    while(v0.size > 0){
+        nmsnode self = ps_vector_at(v0,0);
+
+        ps_vector_push_back(v1, self, nmsnode);
+
+        ps_vector_nmsnode v2;
+        ps_vector_create(v2,nmsnode);
+
+        for(int i=1;i<v0.size;++i){
+            nmsnode other = ps_vector_at(v0,i);
+            float iou = get_iou(i_b[self.i], i_b[other.i]);
+            if(iou <= i_nmsthresh){
+                ps_vector_push_back(v2, other, nmsnode);
+            }
+        }
+
+        ps_vector_destroy(v0,no_op);
+        v0 = v2;
+
     }
 
+    ps_vector_destroy(v0,no_op);
 
+    for(int i=0; i<v1.size; ++i){
+        o_index[i] = ps_vector_at(v1,i).i;
+    }
+    *o_nindex = (int)v1.size;
 }
 
 /* trying out non maximum suppression */
@@ -763,44 +803,53 @@ void test10() {
     char buffer[80];
     PS_INFO("%s opengl vendor\n",(char*)glGetString(GL_VENDOR));
 
-    ps_vec4 boxes[] = {
-        {10,10,40,50},
-        {20,30,80,110},
-        {40,50,90,110},
-        {50,60,100,100}
-    };
+    FILE* f = fopen("boxconfs.dat","r");
+    int nboxes;
+    fscanf(f, "%d",&nboxes);
+    ps_vec4* boxes = (ps_vec4*)malloc(sizeof(ps_vec4)*nboxes);
+    float* confs = (float*)malloc(sizeof(float)*nboxes);
+    for(int i=0;i<nboxes;++i){
+        fscanf(f, "%f %f %f %f %f",
+        &(boxes[i].x), 
+        &(boxes[i].y), 
+        &(boxes[i].z), 
+        &(boxes[i].w), 
+        &confs[i]);
+    }
+    fclose(f);
 
-    float confs[] = {
-        0.55f,
-        0.65f,
-        0.78f,
-        0.78f
-    };
+    float tmax = 1.0f;
+    float tmin = 0.0f;
+    float ttime = 2.0f;
+    float th = tmin;
+    float tdt = (tmax - tmin) / (FPS*ttime);
 
-    int* outindexes = (int*)malloc(sizeof(int)*ps_count(confs));
-    int outn = ps_count(confs);
-
-    nmsc(
-        boxes,
-        ps_count(boxes),
-        confs,
-        ps_count(confs),
-        0.6f,
-        0.7f,
-        outindexes,
-        &outn
-    );
-
-    free(outindexes);
+    int* indx = (int*)malloc(sizeof(int)*nboxes);
+    for(int i=0;i<nboxes;++i){
+        indx[i] = -1;
+    }
+    int nindx = nboxes;
 
     while(is_running){
         ps_graphics_window_poll_events(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        for (int i = 0; i < ps_count(boxes); ++i) {
+
+        nmsc(
+            boxes,
+            nboxes,
+            confs,
+            nboxes,
+            0.0f,
+            0.6f,
+            indx,
+            &nindx
+        );
+
+        for (int i = 0; i < nindx ; ++i) {
             draw_rect(
-                (ps_vec2){boxes[i].x, boxes[i].y},
-                (ps_vec2){boxes[i].z, boxes[i].z},
-                (ps_color){color.r,color.g,color.b,confs[i]*confs[i]*confs[i]}
+                (ps_vec2){boxes[indx[i]].x, boxes[indx[i]].y},
+                (ps_vec2){boxes[indx[i]].z, boxes[indx[i]].z},
+                (ps_color){color.r,color.g,color.b,1.0f * confs[indx[i]] * confs[indx[i]] * confs[indx[i]]}
             );
          }
 
@@ -808,9 +857,20 @@ void test10() {
         sprintf(buffer, "[%s] (%0.3lf FPS)",APPNAME, ps_clock_fps(c));
         ps_graphics_window_set_title(window, buffer);
         ps_clock_reset(c);
+        PS_INFO("nmsthresh : %f\n",th);
+        if(ps_clock_uptime(c) > ttime){
+            tdt = -tdt;
+            ps_clock_reset_uptime(c);
+        }
+        th = ps_clamp(th + tdt, 0.0f, 1.0f);
         ps_graphics_window_swap_buffers(window);
         is_running = !ps_graphics_window_should_close(window);
     }
+
+    free(indx);
+    free(boxes);
+    free(confs);
+
     ps_graphics_destroy(window);
     ps_graphics_release_window(window);
     ps_clock_stop(c);

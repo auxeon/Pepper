@@ -69,9 +69,7 @@ typedef struct ps_vector_##type ps_vector_##type
 }
 
 #define ps_vector_destroy(vec,destroy_func){\
-    wihle(size--){\
-        destroy_func((vec).data[size-1]);\
-    }\
+    destroy_func((vec));\
     (vec).size = 0;\
     (vec).capacity = 0;\
     free((vec).data);\

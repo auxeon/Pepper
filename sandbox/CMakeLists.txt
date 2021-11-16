@@ -10,6 +10,7 @@ set(sandbox_INCLUDES
 set(COMPILER_OPTIONS
     "-Wall"
     "-O3"
+    "-g"
     )
 set(LINKER_OPTIONS
     "-mavx"
@@ -37,6 +38,7 @@ set_target_properties(sandbox
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin"
     RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin"
+    C_STANDARD 99
 )
 
 add_custom_command(TARGET sandbox POST_BUILD

@@ -15,13 +15,23 @@ set(CMAKE_MODULE_PATH
     "${CMAKE_MODULE_PATH}"
 )
 
-set(COMPILER_OPTIONS
-    "-Wall"
-    "-O3"
+if (MSVC)
+    set(COMPILER_OPTIONS
+        "-Wall"
+        "-O3"
+        "-Oi"
+        )
+    set(LINKER_OPTIONS
     )
-set(LINKER_OPTIONS
-    "-mavx"
-)
+else()
+    set(COMPILER_OPTIONS
+        "-Wall"
+        "-O3"
+        )
+    set(LINKER_OPTIONS
+        "-mavx"
+    )
+endif()
 
 add_compile_options(${COMPILE_OPTIONS})
 add_link_options(${LINKER_OPTIONS})

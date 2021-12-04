@@ -7,13 +7,24 @@ set(sandbox_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/../ps_types.h"
 )
-set(COMPILER_OPTIONS
-    "-Wall"
-    "-O3"
+if (MSVC)
+    set(COMPILER_OPTIONS
+        "-Wall"
+        "-O3"
+        "-Oi"
+        )
+    set(LINKER_OPTIONS
     )
-set(LINKER_OPTIONS
-    "-mavx"
-)
+else()
+    set(COMPILER_OPTIONS
+        "-Wall"
+        "-O3"
+        )
+    set(LINKER_OPTIONS
+        "-mavx"
+    )
+endif()
+
 
 add_compile_options(${COMPILE_OPTIONS})
 add_link_options(${LINKER_OPTIONS})

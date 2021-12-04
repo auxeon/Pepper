@@ -9,7 +9,6 @@
 
 #ifdef _WIN64
 #define random rand
-#define _CRT_SECURE_NO_WARNINGS
 #include "Windows.h"
 #endif
 
@@ -93,7 +92,7 @@ void test1(){
     ps_vector_pop_back(v1,node);
     ps_vector_pop_back(v1,node);
     display_merge(v1.data,v1.size);
-    getchar();
+    (void)getchar();
 }
 
 /*
@@ -114,32 +113,32 @@ void test2(){
     }
     ps_clock_stop(c);
     PS_INFO("total time : %lfs", ps_clock_uptime(c));
-    getchar();
+    (void)getchar();
 }
 
 
 /* r is the reductor to maintain state across function calls */
-void draw_polygon(ps_vec2 point, float delta, float angle, float radius, ps_color color){
+void draw_polygon(ps_vec2 point, double delta, double angle, double radius, ps_color color){
     glBegin(GL_LINE_LOOP);
-    float alpha = ps_clamp(color.a,0.0f,1.0f);
-    glColor3f((GLfloat)sin(color.r)*alpha, (GLfloat)sin(color.g)*alpha, (GLfloat)sin(color.b)*alpha);
-    const float dx = 0.0f;
-    const float dy = 0.0f;
-    for(float i=0;i<angle;i+=delta){
-        glVertex2f((GLfloat)point.x + radius* (GLfloat)cos(ps_deg2rad(i)), (GLfloat)point.y + radius* (GLfloat)sin(ps_deg2rad(i)));
+    double alpha = ps_clamp(color.a,0.0f,1.0f);
+    glColor3f((GLfloat)sin(color.r) * (GLfloat)alpha, (GLfloat)sin(color.g) * (GLfloat)alpha, (GLfloat)sin(color.b) * (GLfloat)alpha);
+    const double dx = 0.0f;
+    const double dy = 0.0f;
+    for(double i=0;i<angle;i+=delta){
+        glVertex2f((GLfloat)point.x + (GLfloat)radius * (GLfloat)cos(ps_deg2rad(i)), (GLfloat)point.y + (GLfloat)radius * (GLfloat)sin(ps_deg2rad(i)));
     }
     glEnd();
 }
 
 /* r is the reductor to maintain state across function calls */
 void draw_rectangle(ps_vec2 bottom_left, ps_vec2 size, ps_color color) {
-    const float alpha = ps_clamp(color.a,0.0f,1.0f);
-    glColor3f((GLfloat)sin(color.r)*alpha, (GLfloat)sin(color.g)*alpha, (GLfloat)sin(color.b)*alpha);
+    const double alpha = ps_clamp(color.a,0.0f,1.0f);
+    glColor3f((GLfloat)sin(color.r) * (GLfloat)alpha, (GLfloat)sin(color.g) * (GLfloat)alpha, (GLfloat)sin(color.b) * (GLfloat)alpha);
     glBegin(GL_LINE_LOOP);
     glVertex2f((GLfloat)bottom_left.x, (GLfloat)bottom_left.y);
-    glVertex2f((GLfloat)bottom_left.x+size.w, (GLfloat)bottom_left.y);
-    glVertex2f((GLfloat)bottom_left.x+size.w, (GLfloat)bottom_left.y+size.h);
-    glVertex2f((GLfloat)bottom_left.x, (GLfloat)bottom_left.y+size.h);
+    glVertex2f((GLfloat)bottom_left.x + (GLfloat)size.w, (GLfloat)bottom_left.y);
+    glVertex2f((GLfloat)bottom_left.x + (GLfloat)size.w, (GLfloat)bottom_left.y + (GLfloat)size.h);
+    glVertex2f((GLfloat)bottom_left.x, (GLfloat)bottom_left.y + (GLfloat)size.h);
     glEnd();
 }
 
@@ -166,27 +165,27 @@ void test3(){
     bool is_running = true;
 
     ps_color color = (ps_color){PS_COLOR_EMERALD, .a=1.0f};
-    float shapes_delta[] = {120.0f,90.0f,60.0f,45.0f,30.0f,15.0f,5.0f};
-    float shapes_time[] = {1.0f,1.0f,1.0f,1.0f,1.0f,1.0f,1.0f};
+    double shapes_delta[] = {120.0,90.0,60.0,45.0,30.0,15.0,5.0};
+    double shapes_time[] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0};
     int total_shapes = sizeof(shapes_delta)/sizeof(shapes_delta[0]);
 
     int mode = 0;
-    float delta = shapes_delta[mode];
-    float duration = shapes_time[mode];
+    double delta = shapes_delta[mode];
+    double duration = shapes_time[mode];
     char buffer[80];
     PS_INFO("%s opengl vendor\n",(char*)glGetString(GL_VENDOR));
     ps_vec2 pos = (ps_vec2){
-        .x=0.0f,
-        .y=0.0f
+        .x=0.0,
+        .y=0.0
     };
     while(is_running){
         ps_graphics_window_poll_events(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        for (int i = 1; i < 10; ++i) {
+        for (unsigned int i = 1; i < 10; ++i) {
 
             pos = (ps_vec2){
-                .x=cos(ps_clock_uptime(t)*(i+1)*0.5f + 10*i*PI/180.0f)*0.2f,
-                .y=sin(ps_clock_uptime(t)*(i+1)*0.5f + 10*i*PI/180.0f)*0.2f
+                .x=cos(ps_clock_uptime(t)*(i+1)*0.5 + 10*i*PI/180.0f)*0.2,
+                .y=sin(ps_clock_uptime(t)*(i+1)*0.5 + 10*i*PI/180.0f)*0.2
             };
 
             draw_polygon(
@@ -197,10 +196,10 @@ void test3(){
                 color
             );
          }
-        // float dx = 0.05f;
-        // float pad = 0.0f;
+        // double dx = 0.05;
+        // double pad = 0.0;
         // for (int r = 0; r < 40; ++r) {
-        //    draw_rectangle((ps_vec2){.x = -1.0f+(r*(dx+pad)), .y = -1.0f}, (ps_vec2){.x = 0.05f, .y = rand()%10/20.0f}, color);
+        //    draw_rectangle((ps_vec2){.x = -1.0+(r*(dx+pad)), .y = -1.0}, (ps_vec2){.x = 0.05, .y = rand()%10/20.0}, color);
         // }
         ps_clock_update(c,FPS);
         sprintf(buffer, "[%s] (%0.3lf FPS)",APPNAME, ps_clock_fps(c));
@@ -218,7 +217,7 @@ void test3(){
     ps_clock_stop(c);
     ps_clock_stop(t);
     PS_INFO("total time : %lfs",ps_clock_uptime(t));
-    getchar();
+    (void)getchar();
 }
 
 /*
@@ -246,7 +245,7 @@ void test4(){
     print_int(data, count(data));
     ps_clock_stop(t);
     PS_INFO("total time : %lfs", ps_clock_uptime(t));
-    getchar();
+    (void)getchar();
 }
 
 void test5(){
@@ -255,7 +254,7 @@ void test5(){
     char buffer[80];
     ps_clock_data* t = ps_clock_get();
     ps_clock_start(t);
-    float* samples = (float*)malloc(sizeof(float)*nbins);
+    double* samples = (double*)malloc(sizeof(double)*nbins);
     if (!samples) {
         fprintf(stderr, "samples malloc failed");
         exit(-1);
@@ -273,9 +272,9 @@ void test5(){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         int bars = nbins;
-        float dx = 2.0f/(float)(bars+1);
-        float pad = 0.0f;
-        ps_color color = (ps_color){.r=(float)(rand()/100), .g=(float)(rand()/100), .b=(float)(rand()/100), .a=1.0f};
+        double dx = 2.0f/(double)(bars+1);
+        double pad = 0.0f;
+        ps_color color = (ps_color){.r=(double)(rand()/100), .g=(double)(rand()/100), .b=(double)(rand()/100), .a=1.0f};
         for (int r = 0; r < bars; ++r) {
             draw_rectangle((ps_vec2){.x = -1.0f+dx/2+(r*(dx+pad)), .y = -1.0f}, (ps_vec2){.x = dx, .y = rand()%50/30.0f + samples[r]}, color);
         }
@@ -293,7 +292,7 @@ void test5(){
     free(samples);
     ps_clock_stop(t);
     PS_INFO("total time : %lfs", ps_clock_uptime(t));
-    getchar();
+    (void)getchar();
 }
 
 
@@ -304,7 +303,7 @@ void test5(){
 #define FALSE 0
 #define TRUE 1
 #define SUCCESS 0
-#define ERROR -1
+#define MAERROR -1
 
 ps_clock_data* t6;
 
@@ -366,7 +365,7 @@ void test6(){
 
     ps_clock_stop(t);
     PS_INFO("total time : %lfs", ps_clock_uptime(t));
-    getchar();
+    (void)getchar();
 }
 
 
@@ -554,7 +553,7 @@ void test7() {
 
     ps_clock_stop(t);
     PS_INFO("total time : %lfs", ps_clock_uptime(t));
-    getchar();
+    (void)getchar();
 }
 bool update_fn(int* t, int* i) {
     *i += 1;
@@ -588,7 +587,7 @@ void test8() {
     ps_clock_stop(t);
     printf("\n");
     PS_INFO("total time : %lfs", ps_clock_uptime(t));
-    getchar();
+    (void)getchar();
 }
 
 
@@ -599,20 +598,20 @@ void add_rand_arrays_simple(int* vin_0, int vsz_0, int* vin_1, int vsz_1, int* v
     }
 }
 
-void add_rand_arrays_noindexing(int* restrict vin_0, int vsz_0, int* restrict vin_1, int vsz_1, int* restrict vout_0) {
+void add_rand_arrays_noindexing(int*  vin_0, int vsz_0, int* vin_1, int vsz_1, int*  vout_0) {
     int* const end = vout_0 + vsz_1;
     while(vout_0<end){
         *(vout_0++) = *(vin_0++) + *(vin_1++);
     }
 }
 
-void add_rand_arrays_vectorized(int* restrict vin_0, int vsz_0, int* restrict vin_1, int vsz_1, int* restrict vout_0) {
+void add_rand_arrays_vectorized(int* __restrict vin_0, int vsz_0, int* __restrict vin_1, int vsz_1, int* __restrict vout_0) {
     const int aligned = vsz_1 - vsz_1 % 4;
     for (int i = 0; i < aligned; i+=4) {
-        _mm_storeu_si128((__m128i_u*)&vout_0[i], 
+        _mm_storeu_si128((__m128i*)&vout_0[i], 
             _mm_add_epi32(
-                _mm_loadu_si128((__m128i_u*)&vin_0[i]), 
-                _mm_loadu_si128((__m128i_u*)&vin_1[i])
+                _mm_loadu_si128((__m128i*)&vin_0[i]), 
+                _mm_loadu_si128((__m128i*)&vin_1[i])
             )
         );
     }
@@ -623,6 +622,9 @@ void add_rand_arrays_vectorized(int* restrict vin_0, int vsz_0, int* restrict vi
 
 int* populate_randints(int vsz_0) {
     int* vout_0 = (int*)malloc(sizeof(int)*vsz_0);
+    if (!vout_0) {
+        return vout_0;
+    }
     for(int i=0; i<vsz_0; ++i) {
         vout_0[i] = rand()%1000;
     }
@@ -655,6 +657,9 @@ void test9() {
     // print_array(v0,sz);
     // print_array(v1,sz);
     // print_array(v2,sz);
+    free(v0);
+    free(v1);
+    free(v2);
 }
 
 void test10() {

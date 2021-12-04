@@ -19,7 +19,7 @@
 
 // macros
 #define ps_count(x) sizeof((x))/sizeof((x)[0])
-#define ps_deg2rad(x) PI/180.0f*(x)
+#define ps_deg2rad(x) PI/180.0*(x)
 #define ps_rad2deg(x) 180.0/PI*(x)
 #define ps_max(a,b) (((a) > (b)) ? (a) : (b))
 #define ps_min(a,b) (((a) < (b)) ? (a) : (b))
@@ -28,21 +28,21 @@
 
 // typedefs
 typedef struct ps_vec2{
-    union {float x, u, s, w;};
-    union {float y, v, t, h;};
+    union {double x, u, s, w;};
+    union { double y, v, t, h;};
 }ps_vec2;
 
 typedef struct ps_vec3{
-    union {float x, r, s;};
-    union {float y, g, t;};
-    union {float z, b, p;};
+    union {double x, r, s;};
+    union {double y, g, t;};
+    union {double z, b, p;};
 }ps_vec3;
 
 typedef struct ps_vec4{
-    union {float x, r, s;};
-    union {float y, g, t;};
-    union {float z, b, p;};
-    union {float w, a, q;};
+    union {double x, r, s;};
+    union {double y, g, t;};
+    union {double z, b, p;};
+    union {double w, a, q;};
 }ps_vec4;
 
 typedef ps_vec4 ps_color;   

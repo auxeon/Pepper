@@ -11,7 +11,7 @@
 #include "../ps_types.h"
 #include "math.h"
 
-float ps_vec2_magnitude(ps_vec2 v0) {
+double ps_vec2_magnitude(ps_vec2 v0) {
     return sqrt(v0.x*v0.x + v0.y*v0.y);
 }
 

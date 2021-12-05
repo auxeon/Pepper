@@ -1,16 +1,17 @@
 /*
 @author Abhikalp Unakal
 @date   08 june 2021
-@file   main.c
+@file   main.c  
 @desc   sandbox launcher and tests
 */
 
-#include "immintrin.h"
-
-#ifdef _WIN64
+#if defined _WIN64 || defined _WIN32
+#define _CRT_SECURE_NO_WARNINGS
 #define random rand
 #include "Windows.h"
 #endif
+
+#include "immintrin.h"
 
 /*
 included Windows.h before glad.h gets included in pch.h/ps_graphics.h to deal with warning C4005: 'APIENTRY': macro redefinition 
@@ -32,8 +33,7 @@ typedef struct node{
 }node;
 
 node node_create(int val, int id){
-    node n = {.val=val, .id=id};
-    return n;
+    return (node){val, id};
 }
 /*
     essential to setup the struct needed for vector ops using macros
@@ -141,7 +141,21 @@ void draw_rectangle(ps_vec2 bottom_left, ps_vec2 size, ps_color color) {
     glVertex2f((GLfloat)bottom_left.x, (GLfloat)bottom_left.y + (GLfloat)size.h);
     glEnd();
 }
+/* draw in the screen space*/
+void draw_rect(ps_vec2 bottom_left, ps_vec2 top_right, ps_color color){
 
+    bottom_left.x = (bottom_left.x/(float)APPW)*2.0f - 1.0f;
+    bottom_left.y = (bottom_left.y/(float)APPH)*2.0f - 1.0f;
+    top_right.x = (top_right.x/(float)APPW)*2.0f - 1.0f;
+    top_right.y = (top_right.y/(float)APPH)*2.0f - 1.0f;
+
+    draw_rectangle(
+        bottom_left,
+        (ps_vec2){top_right.x-bottom_left.x,top_right.y-bottom_left.y},
+        color
+    );
+
+}
 
 /*
     opengl rendering with frame rate control and windowing
@@ -181,11 +195,11 @@ void test3(){
     while(is_running){
         ps_graphics_window_poll_events(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        for (unsigned int i = 1; i < 10; ++i) {
+        for (int i = 1; i < 10; ++i) {
 
             pos = (ps_vec2){
-                .x=cos(ps_clock_uptime(t)*(i+1)*0.5 + 10*i*PI/180.0f)*0.2,
-                .y=sin(ps_clock_uptime(t)*(i+1)*0.5 + 10*i*PI/180.0f)*0.2
+                .x=cos(ps_clock_uptime(t)*((double)i+1)*0.5 + 10*(double)i*PI/180.0f)*0.2,
+                .y=sin(ps_clock_uptime(t)*((double)i+1)*0.5 + 10*(double)i*PI/180.0f)*0.2
             };
 
             draw_polygon(
@@ -272,7 +286,7 @@ void test5(){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         int bars = nbins;
-        double dx = 2.0f/(double)(bars+1);
+        double dx = 2.0f/((double)bars+1.0);
         double pad = 0.0f;
         ps_color color = (ps_color){.r=(double)(rand()/100), .g=(double)(rand()/100), .b=(double)(rand()/100), .a=1.0f};
         for (int r = 0; r < bars; ++r) {
@@ -316,8 +330,6 @@ void data_callback_test6(ma_device* pDevice, void* output, const void* input, ma
     // That(void) casting construct is a no - op that makes the compiler unused variable warning go away
     (void)input;
 }
-
-
 
 void test6(){
     PS_INFO("[%s] : setting up miniaudio for audio playback", __FUNCTION__);
@@ -378,8 +390,8 @@ For simplicity, this example requires the device to use floating point samples.
 
 
 ma_uint32   g_decoderCount;
-ma_decoder* g_pDecoders;
-ma_bool32* g_pDecodersAtEnd;
+ma_decoder* g_pDecoders = NULL;
+ma_bool32* g_pDecodersAtEnd = NULL;
 
 ma_event g_stopEvent; /* <-- Signaled by the audio thread, waited on by the main thread. */
 
@@ -662,8 +674,225 @@ void test9() {
     free(v2);
 }
 
+
+double get_iou(ps_vec4 b0, ps_vec4 b1){
+
+    double a1 = (b0.z - b0.x) * (b0.w - b0.y);
+    double a2 = (b1.z - b1.x) * (b1.w - b1.y);
+
+    double xx1 = ps_max(b0.x,b1.x);
+    double yy1 = ps_max(b0.y,b1.y);
+    double xx2 = ps_min(b0.z,b1.z);
+    double yy2 = ps_min(b0.w,b1.w);
+
+    double w = ps_max(xx2 - xx1,0.0f);
+    double h = ps_max(yy2 - yy1,0.0f);
+
+    double i = w * h;
+    double u = a1 + a1 - i;
+
+    double iou = i/u;
+    return iou;
+}
+
+
+
+typedef struct nmsnode{
+    int i;
+    double c;
+} nmsnode;
+
+ps_vector_declare(nmsnode);
+ps_vector_declare(ps_vec4);
+
+int nms_cmp(const void* a, const void* b){
+    return (*(nmsnode*)a).c < (*(nmsnode*)b).c;
+}
+
+void no_op(ps_vector_nmsnode a){
+
+}
+
+nmsnode nmsnode_create(int i, double c){
+    return (nmsnode){i,c};
+}
+
+/*
+    input boxes
+    input nboxes
+    input confs
+    input nconfs
+    input confthresh
+    input nmsthresh
+    output boxindexes
+    output nboxindexes
+*/
+void nmsc(
+    ps_vec4* i_b, 
+    int i_nb, 
+    double* i_c, 
+    int i_nc,
+    double i_cthresh,
+    double i_nmsthresh,
+    int* o_index, 
+    int* o_nindex
+    ){
+
+    ps_vector_nmsnode v0; 
+    ps_vector_nmsnode v1; 
+
+    ps_vector_create(v0, nmsnode);
+    ps_vector_create(v1, nmsnode);
+
+    // trim all the confs that are less than 0.65
+    for(int i=0;i<i_nc;++i){
+        if(i_c[i] > i_cthresh){
+            ps_vector_push_back(v0, nmsnode_create(i,i_c[i]), nmsnode);
+        }
+    }
+
+    // sort based on highest confs first
+    ps_mergesort(v0.data,0,v0.size-1,sizeof(nmsnode),nms_cmp);
+
+    // dump it all out 
+    // for(int i=0;i<v0.size;++i){
+    //     printf("%d (%f)\n",i,ps_vector_at(v0,i).c);
+    // }
+
+    while(v0.size > 0){
+        nmsnode self = ps_vector_at(v0,0);
+
+        ps_vector_push_back(v1, self, nmsnode);
+
+        ps_vector_nmsnode v2;
+        ps_vector_create(v2,nmsnode);
+
+        for(int i=1;i<v0.size;++i){
+            nmsnode other = ps_vector_at(v0,i);
+            double iou = get_iou(i_b[self.i], i_b[other.i]);
+            if(iou <= i_nmsthresh){
+                ps_vector_push_back(v2, other, nmsnode);
+            }
+        }
+
+        ps_vector_destroy(v0,no_op);
+        v0 = v2;
+
+    }
+
+    ps_vector_destroy(v0,no_op);
+
+    for(int i=0; i<v1.size; ++i){
+        o_index[i] = ps_vector_at(v1,i).i;
+    }
+    *o_nindex = (int)v1.size;
+}
+
+/* trying out non maximum suppression */
 void test10() {
-    return;
+   if (FPS){
+        PS_INFO("[%s] : opengl windowing + %dFPS",__FUNCTION__,FPS);
+    }
+    else{
+        PS_INFO("[%s] : FPS set to 0",__FUNCTION__);
+        PS_INFO("[%s] : opengl windowing + MAX FPS",__FUNCTION__);
+    }
+
+    ps_clock_data* t = ps_clock_get();
+    ps_clock_data* c = ps_clock_get();
+    ps_clock_start(t);
+    ps_clock_start(c);
+    
+    ps_graphics_window* window = ps_graphics_get_window();
+    ps_graphics_init(window,APPNAME,APPW,APPH);
+    bool is_running = true;
+
+    ps_color color = (ps_color){PS_COLOR_EMERALD, .a=1.0f};
+
+    char buffer[80];
+    PS_INFO("%s opengl vendor\n",(char*)glGetString(GL_VENDOR));
+
+    FILE* f = fopen("boxconfs.dat","r");
+    int nboxes;
+
+    /* no op (void) to suppress unused return value warning */
+    (void)fscanf(f, "%d",&nboxes);
+    if (nboxes < 0) {
+        return;
+    }
+    ps_vec4* boxes = (ps_vec4*)malloc(sizeof(ps_vec4)*nboxes);
+    double* confs = (double*)malloc(sizeof(double)*nboxes);
+    for(int i=0;i<nboxes;++i){
+        (void)fscanf(f, "%lf %lf %lf %lf %lf",
+        &(boxes[i].x), 
+        &(boxes[i].y), 
+        &(boxes[i].z), 
+        &(boxes[i].w), 
+        &confs[i]);
+    }
+    fclose(f);
+
+    double tmax = 1.0f;
+    double tmin = 0.0f;
+    double ttime = 2.0f;
+    double th = tmin;
+    double tdt = (tmax - tmin) / (FPS*ttime);
+
+    int* indx = (int*)malloc(sizeof(int)*nboxes);
+    if (!indx) {
+        return;
+    }
+    for(int i=0;i<nboxes;++i){
+        indx[i] = -1;
+    }
+    int nindx = nboxes;
+
+    while(is_running){
+        ps_graphics_window_poll_events(window);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        nmsc(
+            boxes,
+            nboxes,
+            confs,
+            nboxes,
+            0.0,
+            0.6,
+            indx,
+            &nindx
+        );
+
+        for (int i = 0; i < nindx && i < nboxes; ++i) {
+            draw_rect(
+                (ps_vec2){boxes[indx[i]].x, boxes[indx[i]].y},
+                (ps_vec2){boxes[indx[i]].z, boxes[indx[i]].z},
+                (ps_color){color.r,color.g,color.b,1.0 * confs[indx[i]] * confs[indx[i]] * confs[indx[i]]}
+            );
+         }
+
+        ps_clock_update(c,FPS);
+        sprintf(buffer, "[%s] (%0.3lf FPS)",APPNAME, ps_clock_fps(c));
+        ps_graphics_window_set_title(window, buffer);
+        ps_clock_reset(c);
+        PS_INFO("nmsthresh : %lf\n",th);
+        if(ps_clock_uptime(c) > ttime){
+            tdt = -tdt;
+            ps_clock_reset_uptime(c);
+        }
+        th = ps_clamp(th + tdt, 0.0, 1.0);
+        ps_graphics_window_swap_buffers(window);
+        is_running = !ps_graphics_window_should_close(window);
+    }
+
+    free(indx);
+    free(boxes);
+    free(confs);
+
+    ps_graphics_destroy(window);
+    ps_graphics_release_window(window);
+    ps_clock_stop(c);
+    ps_clock_stop(t);
+    PS_INFO("total time : %lfs",ps_clock_uptime(t));
 }
 
 int main(int argc,char** argv){
@@ -678,7 +907,8 @@ int main(int argc,char** argv){
         test6,
         test7,
         test8,
-        test9
+        test9,
+        test10
     };
 
     if(argc > 1){

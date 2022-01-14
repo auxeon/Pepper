@@ -1068,7 +1068,7 @@ void test11(){
         is_running = !ps_graphics_window_should_close(window);
     }
 
-    printf("Playing %s\n", buffer);
+    printf("Playing %s\n", filepath);
     printf("Press Enter to quit...");
     int res = getchar();
 

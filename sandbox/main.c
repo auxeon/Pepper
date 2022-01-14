@@ -27,10 +27,10 @@ included Windows.h before glad.h gets included in pch.h/ps_graphics.h to deal wi
 */
 
 
-typedef struct node{
-    int val;
-    int id;
-}node;
+// typedef struct node{
+//     int val;
+//     int id;
+// }node;
 
 node node_create(int val, int id){
     return (node){val, id};
@@ -118,13 +118,15 @@ void test2(){
 
 
 /* r is the reductor to maintain state across function calls */
-void draw_polygon(ps_vec2 point, double delta, double angle, double radius, ps_color color){
-    glBegin(GL_LINE_LOOP);
+void draw_polygon(GLenum mode, ps_vec2 point, double delta, double angle, double radius, ps_color color, bool fliph){
+    glBegin(mode);
     double alpha = ps_clamp(color.a,0.0f,1.0f);
     glColor3f((GLfloat)sin(color.r) * (GLfloat)alpha, (GLfloat)sin(color.g) * (GLfloat)alpha, (GLfloat)sin(color.b) * (GLfloat)alpha);
     const double dx = 0.0f;
     const double dy = 0.0f;
-    for(double i=0;i<angle;i+=delta){
+    const double lo = fliph?-angle/2.0:0.0;
+    const double hi = fliph?angle/2.0:angle;
+    for(double i=lo;i<hi;i+=delta){
         glVertex2f((GLfloat)point.x + (GLfloat)radius * (GLfloat)cos(ps_deg2rad(i)), (GLfloat)point.y + (GLfloat)radius * (GLfloat)sin(ps_deg2rad(i)));
     }
     glEnd();
@@ -178,7 +180,7 @@ void test3(){
     ps_graphics_init(window,APPNAME,APPW,APPH);
     bool is_running = true;
 
-    ps_color color = (ps_color){PS_COLOR_EMERALD, .a=1.0f};
+    ps_color color = (ps_color){PS_COLOR_EMERALD, .a=1.0};
     double shapes_delta[] = {120.0,90.0,60.0,45.0,30.0,15.0,5.0};
     double shapes_time[] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0};
     int total_shapes = sizeof(shapes_delta)/sizeof(shapes_delta[0]);
@@ -203,11 +205,13 @@ void test3(){
             };
 
             draw_polygon(
+                GL_LINE_LOOP,
                 pos,
                 shapes_delta[mode],
                 360.0, 
                 0.05, 
-                color
+                color,
+                false
             );
          }
         // double dx = 0.05;
@@ -286,11 +290,11 @@ void test5(){
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         int bars = nbins;
-        double dx = 2.0f/((double)bars+1.0);
-        double pad = 0.0f;
-        ps_color color = (ps_color){.r=(double)(rand()/100), .g=(double)(rand()/100), .b=(double)(rand()/100), .a=1.0f};
+        double dx = 2.0/((double)bars+1.0);
+        double pad = 0.0;
+        ps_color color = (ps_color){.r=(double)(rand()/100), .g=(double)(rand()/100), .b=(double)(rand()/100), .a=1.0};
         for (int r = 0; r < bars; ++r) {
-            draw_rectangle((ps_vec2){.x = -1.0f+dx/2+(r*(dx+pad)), .y = -1.0f}, (ps_vec2){.x = dx, .y = rand()%50/30.0f + samples[r]}, color);
+            draw_rectangle((ps_vec2){.x = -1.0+dx/2+(r*(dx+pad)), .y = -1.0}, (ps_vec2){.x = dx, .y = rand()%50/30.0 + samples[r]}, color);
         }
         ps_clock_update(t,FPS);
         sprintf(buffer, "[%s] (%0.3lf FPS)",APPNAME, ps_clock_fps(t));
@@ -369,7 +373,7 @@ void test6(){
         return;
     }
     printf("Playing %s\n", buffer);
-    printf("Press Enter to quit...");
+    printf("Press Enter to quit...\n");
     int res = getchar();
 
     ma_device_uninit(&device);
@@ -552,7 +556,9 @@ void test7() {
     printf("Playing [ %s , %s ]\n", buffer[0], buffer[1]);
     PS_INFO("Waiting for playback to complete...\n");
 
-    ma_event_wait(&g_stopEvent);
+    //ma_event_wait(&g_stopEvent);
+    printf("Press Enter to quit...\n");
+    int res = getchar();
 
     /* Getting here means the audio thread has signaled that the device should be stopped. */
     ma_device_uninit(&device);
@@ -672,6 +678,7 @@ void test9() {
     free(v0);
     free(v1);
     free(v2);
+    (void)getchar();
 }
 
 
@@ -893,22 +900,205 @@ void test10() {
     ps_clock_stop(c);
     ps_clock_stop(t);
     PS_INFO("total time : %lfs",ps_clock_uptime(t));
+    (void)getchar();
 }
+
+
+
+typedef struct customdata{
+    ma_decoder* mDecoder;
+    double osc01; // pan from left to right
+}customdata;
+
+void data_callback_pan_audio(ma_device* pDevice, void* output, const void* input, ma_uint32 frame_count){
+    ma_decoder* pDecoder = ((customdata*)(pDevice->pUserData))->mDecoder;
+    double osc01 = ((customdata*)(pDevice->pUserData))->osc01;
+    ma_uint32 frames_read = (ma_uint32)ma_decoder_read_pcm_frames(pDecoder, output, frame_count);
+
+    for (ma_uint32 i = 0; i < frames_read * C_COUNT; i+=2) {
+        ((float*)output)[i + 0] = ((float*)output)[i + 0] * (1.0-osc01);
+        ((float*)output)[i + 1] = ((float*)output)[i + 1] * (osc01);
+    }
+    // That(void) casting construct is a no - op that makes the compiler unused variable warning go away
+    (void)input;
+}
+
+double lerp01lohi(double lo, double hi, double t){
+    return (1.0-t)*lo + (t)*hi;
+}
+
+
+/*
+    pan audio from left to right
+*/
+void test11(){
+    if (FPS){
+        PS_INFO("[%s] : panning audio left to right + %dFPS",__FUNCTION__,FPS);
+    }
+    else{
+        PS_INFO("[%s] : panning audio left to right + %dFPS",__FUNCTION__,FPS);
+        PS_INFO("[%s] : FPS set to 0",__FUNCTION__);
+        PS_INFO("[%s] : opengl windowing + MAX FPS",__FUNCTION__);
+    }
+
+    ps_clock_data* t = ps_clock_get();
+    ps_clock_data* c = ps_clock_get();
+    ps_clock_start(t);
+    ps_clock_start(c);
+    
+    ps_graphics_window* window = ps_graphics_get_window();
+    ps_graphics_init(window,APPNAME,APPW,APPH);
+    bool is_running = true;
+
+    ps_color color1 = (ps_color){PS_COLOR_EMERALD, .a=1.0};
+    ps_color color2 = (ps_color){PS_COLOR_RED, .a=1.0};
+    double shapes_delta[] = {120.0};
+    double shapes_time[] = {1.0};
+    int total_shapes = sizeof(shapes_delta)/sizeof(shapes_delta[0]);
+
+    int mode = 0;
+    double delta = shapes_delta[mode];
+    double duration = shapes_time[mode];
+    char buffer[80];
+    PS_INFO("%s opengl vendor\n",(char*)glGetString(GL_VENDOR));
+    ps_vec2 pos = (ps_vec2){
+        .x=0.0,
+        .y=0.0
+    };
+    ps_vec2 prev_pos = (ps_vec2){
+        .x=0.0,
+        .y=0.0
+    };
+
+    // audio stuff here
+    ma_result result;
+    ma_decoder decoder;
+    ma_device_config deviceConfig;
+    ma_device device;
+    customdata cdata;
+
+    const char* filepath = "ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3";
+    result = ma_decoder_init_file(filepath, NULL, &decoder);
+    if (result != SUCCESS) {
+        PS_ERROR("decoder failed\n");
+        return;
+    }
+
+    cdata.mDecoder = &decoder;
+    cdata.osc01 = 0.0;
+
+    deviceConfig = ma_device_config_init(ma_device_type_playback);
+    deviceConfig.playback.format = decoder.outputFormat;
+    deviceConfig.playback.channels = decoder.outputChannels;
+    deviceConfig.sampleRate = decoder.outputSampleRate;
+    deviceConfig.dataCallback = data_callback_pan_audio;
+    deviceConfig.pUserData = &cdata;
+
+    if (ma_device_init(NULL, &deviceConfig, &device) != SUCCESS) {
+        PS_ERROR("Failed to open playback device.\n");
+        ma_decoder_uninit(&decoder);
+        return;
+    }
+
+    if (ma_device_start(&device) != SUCCESS) {
+        PS_ERROR("Failed to start playback device.\n");
+        ma_device_uninit(&device);
+        ma_decoder_uninit(&decoder);
+        return;
+    }
+
+
+    while(is_running){
+        // check for any window events here
+        ps_graphics_window_poll_events(window);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        // processing here 
+
+
+        // rendering here
+        double lovol = 0.2;
+        double hivol = 0.9;
+
+        cdata.osc01 = lerp01lohi(lovol, hivol, (1.0 + sin(ps_clock_uptime(t)*2))/2.0);
+        
+        pos = (ps_vec2){
+            .x=cdata.osc01 - (hivol+lovol)/2.0,
+            .y=0.0
+        };
+
+        bool fliph = ps_vec2_sub(pos, prev_pos).x < 0? true: false;
+        double xoffrect = fliph?-0.09 : 0.07;
+        ps_color color = fliph?color2:color1;
+
+        draw_polygon(
+            GL_LINE_LOOP,
+            pos,
+            shapes_delta[mode],
+            360.0, 
+            0.05, 
+            color,
+            fliph
+        );
+
+        draw_rectangle(
+            (ps_vec2){
+                .x = pos.x + xoffrect,
+                .y = -0.05
+            },
+            (ps_vec2){
+                .x = 0.02,
+                .y = 0.1
+            },
+            color
+        );
+
+        prev_pos = pos;
+        
+        // clock fps timing stuff here
+        ps_clock_update(c,FPS);
+        sprintf(buffer, "[%s] (%0.3lf FPS)",APPNAME, ps_clock_fps(c));
+        ps_graphics_window_set_title(window, buffer);
+        ps_clock_reset(c);
+        if(ps_clock_uptime(c) > shapes_time[mode]){
+            mode = (mode+1)%(total_shapes);
+            ps_clock_reset_uptime(c);
+        }
+        ps_graphics_window_swap_buffers(window);
+        is_running = !ps_graphics_window_should_close(window);
+    }
+
+    printf("Playing %s\n", buffer);
+    printf("Press Enter to quit...");
+    int res = getchar();
+
+    ma_device_uninit(&device);
+    ma_decoder_uninit(&decoder);
+
+    ps_graphics_destroy(window);
+    ps_graphics_release_window(window);
+    ps_clock_stop(c);
+    ps_clock_stop(t);
+    PS_INFO("total time : %lfs",ps_clock_uptime(t));
+    (void)getchar();
+}
+
 
 int main(int argc,char** argv){
 
     void (*tests[])() = {
-        test0,
+        // test0,
         test1,
-        test2,
-        test3,
-        test4,
-        test5,
-        test6,
-        test7,
-        test8,
-        test9,
-        test10
+        // test2,
+        // test3,
+        // test4,
+        // test5,
+        // test6,
+        // test7,
+        // test8,
+        // test9,
+        // test10,
+        // test11
     };
 
     if(argc > 1){

@@ -12,65 +12,40 @@
 #include "stdio.h"
 #include "../ps_types.h"
 
-void ps_merge(
-        void* vector,
-        ps_size_t start,
-        ps_size_t end,
-        ps_size_t data_size,
-        int cmp(const void* a, const void* b)
-    ){
-
-    ps_size_t i=0,j=0,k=start;
-    
-    ps_size_t mid = start + (end-start)/2;
-    ps_size_t ln = mid-start+1;
-    ps_size_t rn = end-mid;
-    
-    char* l = (char*)calloc(ln,data_size);
-    char* r = (char*)calloc(rn,data_size);
-
-    if(!l || !r){
+void ps_merge(void* vec, ps_size_t s, ps_size_t e, ps_size_t d_sz, int cmp(const void* a, const void* b)){
+    ps_size_t i=0,j=0,k=s;
+    ps_size_t m = s + (e-s)/2;
+    ps_size_t ln = m-s+1; 
+    ps_size_t rn = e-m;
+    char* l = (char*)malloc((ln+rn)*d_sz);
+    char* r = l + ln*d_sz;
+    if(!l){
         fprintf(stderr, "%s : %s : line %d : failed to allocate memory\n",__FILE__, __FUNCTION__, __LINE__);
         exit(-1);
     }
-
-    memcpy(l, (char*)vector + data_size*start, data_size*ln);
-    memcpy(r, (char*)vector + data_size*(mid + 1), data_size*rn);
-
+    memcpy(l, (char*)vec + d_sz*s, d_sz*(e-s+1));
     while(i<ln && j<rn){
-        if(cmp(l + data_size*i, r + data_size*j)){
-            memcpy((char*)vector + data_size*(k++), l + data_size*(i++), data_size*(1));
-        }
-        else{
-            memcpy((char*)vector + data_size*(k++), r + data_size*(j++), data_size*(1));
-        }
+        cmp(l + d_sz*i, r + d_sz*j)?
+        memcpy((char*)vec + d_sz*(k++), l + d_sz*(i++), d_sz):
+        memcpy((char*)vec + d_sz*(k++), r + d_sz*(j++), d_sz);
     }
     while(i<ln){
-        memcpy((char*)vector + data_size*(k++), l + data_size*(i++), data_size*(1));
+        memcpy((char*)vec + d_sz*(k++), l + d_sz*(i++), d_sz);
     }
     while(j<rn){
-        memcpy((char*)vector + data_size*(k++), r + data_size*(j++), data_size*(1));
+        memcpy((char*)vec + d_sz*(k++), r + d_sz*(j++), d_sz);
     }
     free(l);
-    free(r);
 }
 
-void ps_mergesort(
-        void* vector,
-        ps_size_t start,
-        ps_size_t end,
-        ps_size_t data_size,
-        int cmp(const void* a, const void* b)
-    ){
-
-    if(start >= end){
+void ps_mergesort(void* vec, ps_size_t s, ps_size_t e, ps_size_t d_sz, int cmp(const void* a, const void* b)){
+    if(s >= e){
         return;
     }
-    
-    ps_size_t mid = start + (end-start)/2;
-    ps_mergesort(vector, start, mid, data_size, cmp);
-    ps_mergesort(vector, mid+1, end, data_size, cmp);
-    ps_merge(vector,start,end,data_size,cmp);
+    ps_size_t m = s + (e - s)/2;
+    ps_mergesort(vec, s, m, d_sz, cmp);
+    ps_mergesort(vec, m+1, e, d_sz, cmp);
+    ps_merge(vec,s,e,d_sz,cmp);
 }
 
 #endif

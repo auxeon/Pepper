@@ -16,6 +16,7 @@
 #define MAXFPS 1000
 #define PI 3.14159265359
 #define PS_COLOR_EMERALD 46.0/256.0, 204/256.0, 113/256.0
+#define PS_COLOR_RED 231.0/256.0, 76/256.0, 60/256.0
 
 // macros
 #define ps_count(x) sizeof((x))/sizeof((x)[0])
@@ -57,5 +58,10 @@ typedef enum ps_event_id{
         P_FROM_SHAPE,
         P_TO_SHAPE
 }ps_event_id;
+
+typedef struct node{
+    int val;
+    int id;
+}node;
 
 #endif

@@ -27,10 +27,10 @@ included Windows.h before glad.h gets included in pch.h/ps_graphics.h to deal wi
 */
 
 
-// typedef struct node{
-//     int val;
-//     int id;
-// }node;
+typedef struct node{
+    int val;
+    int id;
+}node;
 
 node node_create(int val, int id){
     return (node){val, id};
@@ -1087,18 +1087,18 @@ void test11(){
 int main(int argc,char** argv){
 
     void (*tests[])() = {
-        // test0,
+        test0,
         test1,
-        // test2,
-        // test3,
-        // test4,
-        // test5,
-        // test6,
-        // test7,
-        // test8,
-        // test9,
-        // test10,
-        // test11
+        test2,
+        test3,
+        test4,
+        test5,
+        test6,
+        test7,
+        test8,
+        test9,
+        test10,
+        test11
     };
 
     if(argc > 1){

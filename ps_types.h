@@ -59,9 +59,4 @@ typedef enum ps_event_id{
         P_TO_SHAPE
 }ps_event_id;
 
-typedef struct node{
-    int val;
-    int id;
-}node;
-
 #endif

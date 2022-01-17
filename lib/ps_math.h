@@ -11,16 +11,16 @@
 #include "../ps_types.h"
 #include "math.h"
 
-void print_ps_vec2(ps_vec2 vec){
-    printf("(%f, %f)\n",vec.x, vec.y);
+bool ps_vec2_equals(ps_vec2 v0, ps_vec2 v1){
+    return v0.x == v1.x && v0.y == v1.y;
 }
 
-void print_ps_vec3(ps_vec3 vec){
-    printf("(%f, %f, %f)\n",vec.x, vec.y, vec.z);
+bool ps_vec3_equals(ps_vec3 v0, ps_vec3 v1){
+    return v0.x == v1.x && v0.y == v1.y && v0.z == v1.z;
 }
 
-void print_ps_vec4(ps_vec4 vec){
-    printf("(%f, %f, %f, %f)\n",vec.x, vec.y, vec.y, vec.w);
+bool ps_vec4_equals(ps_vec4 v0, ps_vec4 v1){
+    return v0.x == v1.x && v0.y == v1.y && v0.z == v1.z && v0.w == v1.w;
 }
 
 double ps_vec2_magnitude(ps_vec2 v0) {

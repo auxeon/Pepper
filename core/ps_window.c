@@ -9,6 +9,7 @@
 #include "../ps_defines.h"
 #include "ps_window.h"
 #include "ps_keycodes.h"
+#include "../lib/ps_logging.h"
 #include "stdbool.h"
 #include "stdio.h"
 #include "stdlib.h"
@@ -45,10 +46,11 @@ typedef struct ps_window{
   ps_window_impl window;
 }ps_window;
 
+ps_window* ps_window_current = NULL;
+
 ps_input_t* ps_window_input_get_handle(ps_window* window); // get the input manager struct for window
 void ps_window_input_release(ps_window* window); // release the input manager resources
-void ps_window_resize(GLFWwindow* glfwwindow, int w, int h); // callback for window resize
-
+extern bool ps_vec2_equals(ps_vec2 v0, ps_vec2 v1);
 
 // window handle and graphics methods
 ps_window* ps_window_get_handle() {
@@ -78,7 +80,7 @@ void ps_window_init(ps_window* window, const char* title, int width, int height)
   window->height = height;
   // create window
   glfwWindowHint(GLFW_DECORATED, true);
-	glfwWindowHint(GLFW_RESIZABLE, false);
+	glfwWindowHint(GLFW_RESIZABLE, true);
   window->window.handle0 = glfwCreateWindow(window->width,window->height,window->title,NULL,NULL);
   if(!window->window.handle0){
       fprintf(stderr, "%s : %s : line %d : failed to create glfw window\n",__FILE__, __FUNCTION__, __LINE__);
@@ -92,10 +94,7 @@ void ps_window_init(ps_window* window, const char* title, int width, int height)
       exit(-1);
   }
 
-  glfwSetWindowSizeCallback(window->window.handle0, ps_window_resize);
-  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-  const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-  glfwSetWindowPos(window->window.handle0, (int)fabs((mode->width - window->width)/2.0), APPH);
+  glViewport(0,0,window->width,window->height);
   glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBlendEquation(GL_FUNC_ADD);
@@ -110,17 +109,26 @@ ps_vec2 ps_window_screen_get_size(ps_window* window){
   return (ps_vec2){.x=(double)mode->width,.y=(double)mode->height};
 }
 
+ps_vec2 ps_window_get_size(ps_window* window){
+  return (ps_vec2){.x=window->width,.y=window->height};
+}
+
+void ps_window_update(ps_window* window){
+  
+}
+
 void ps_window_resize(GLFWwindow* glfwwindow, int w, int h){
   glfwSetWindowSize(glfwwindow, w, h);
   GLFWmonitor* monitor = glfwGetPrimaryMonitor();
   const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-  double ratio = w / h;
-  if(ratio > 1.0){
-    glViewport((GLint)fabs((mode->width - w)/2.0), 0, APPW, APPH);
-  }
-  else if (ratio < 1.0){
-    glViewport(0,(GLint)fabs((mode->width - w)/2.0), APPW, APPH);
-  }
+  // double ratio = w / h;
+  // if(ratio > 1.0){
+  //   glViewport((GLint)fabs((mode->width - w)/2.0), 0, APPW, APPH);
+  // }
+  // else if (ratio < 1.0){
+  //   glViewport(0,(GLint)fabs((mode->width - w)/2.0), APPW, APPH);
+  // }
+  glViewport(0, 0, w, h);
 }
 
 void ps_window_set_title(ps_window* window, const char* buffer) {
@@ -213,6 +221,18 @@ ps_input_t* ps_window_input_get_handle(ps_window* window){
 
 void ps_window_input_update(ps_window* window){
   #ifdef GLFW
+  // refresh monitor and window states
+  ps_vec2 old_window_size = (ps_vec2){.x=window->width,.y=window->height};
+  int w,h;
+  glfwGetWindowSize(window->window.handle0, &w, &h);
+  ps_vec2 new_window_size = (ps_vec2){w,h};
+  if(!ps_vec2_equals(old_window_size,new_window_size)){
+    window->width = (int)new_window_size.x;
+    window->height = (int)new_window_size.y;
+    glViewport(0,0,window->width,window->height);
+  }
+ 
+
   // refresh keyboard states
   window->window.input0->keyboard0.num = window->window.input0->keyboard1.num;
   memcpy(window->window.input0->keyboard0.keystate, window->window.input0->keyboard1.keystate, sizeof(uint8_t)*window->window.input0->keyboard0.num);
@@ -228,6 +248,7 @@ void ps_window_input_update(ps_window* window){
   }
   window->window.input0->mouse0.position = window->window.input0->mouse1.position;
   glfwGetCursorPos(window->window.handle0, &window->window.input0->mouse1.position.x, &window->window.input0->mouse1.position.y);
+
   #endif
 }
 

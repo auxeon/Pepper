@@ -192,8 +192,9 @@ void test3(){
         colorz = isgreen?color1:color2;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         ps_vec2 mouse_position = ps_window_input_mouse_get_position(window);
-        mouse_position.x = (mouse_position.x / APPW)*2.0 - 1.0;
-        mouse_position.y = (1.0 - (mouse_position.y/APPH))*2.0 - 1.0;
+        ps_vec2 window_size = ps_window_get_size(window);
+        mouse_position.x = (mouse_position.x / window_size.x)*2.0 - 1.0;
+        mouse_position.y = (1.0 - (mouse_position.y/window_size.y))*2.0 - 1.0;
         for (int i = 1; i < 10; ++i) {
             pos = (ps_vec2){
                 .x=mouse_position.x + cos(ps_clock_uptime(t)*((double)i+1)*0.5 + 10*(double)i*PI/180.0f)*0.2,
@@ -228,7 +229,7 @@ void test3(){
         //    draw_rectangle((ps_vec2){.x = -1.0+(r*(dx+pad)), .y = -1.0}, (ps_vec2){.x = 0.05, .y = rand()%10/20.0}, color);
         // }
         ps_clock_update(c,FPS);
-        sprintf(buffer, "[%s] (%0.3lf FPS)",APPNAME, ps_clock_fps(c));
+        sprintf(buffer, "[%s] [%fx%f] (%0.3lf FPS)",APPNAME, window_size.x, window_size.y, ps_clock_fps(c));
         ps_window_set_title(window, buffer);
         ps_clock_reset(c);
         if(ps_clock_uptime(c) > shapes_time[mode]){

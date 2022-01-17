@@ -26,6 +26,7 @@ void                ps_window_swap_buffers(ps_window* window); // swap the rende
 void                ps_window_release(ps_window* window); // release any acquired resources
 void                ps_window_destroy(ps_window* window); // destroy the window and its context and stop processing events
 ps_vec2             ps_window_screen_get_size(ps_window* window); // get current screen w,h
+ps_vec2             ps_window_get_size(ps_window* window); // get current window w,h
 
 void                ps_window_input_update(ps_window* window); // update input events state
 

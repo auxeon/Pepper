@@ -17,7 +17,15 @@
         "string.h": "c",
         "windows.h": "c",
         "stdio.h": "c",
-        "ps_math.h": "c"
+        "ps_math.h": "c",
+        "ps_defines.h": "c",
+        "math.h": "c",
+        "immintrin.h": "c",
+        "ps_window.h": "c",
+        "ps_keycodes.h": "c",
+        "ps_heap.h": "c",
+        "ps_logging.h": "c",
+        "ps_progress.h": "c"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
 }

@@ -1,31 +1,14 @@
-/*
-@author Abhikalp Unakal
-@date   08 june 2021
-@file   main.c  
-@desc   sandbox launcher and tests
+/**
+ @author Abhikalp Unakal
+ @date   08 june 2021
+ @file   main.c  
+ @desc   sandbox launcher and tests
 */
 
-#if defined _WIN64 || defined _WIN32
-#define _CRT_SECURE_NO_WARNINGS
-#define random rand
-#include "Windows.h"
-#endif
-
-#include "immintrin.h"
-
-/*
-included Windows.h before glad.h gets included in pch.h/ps_graphics.h to deal with warning C4005: 'APIENTRY': macro redefinition 
-*/
+// define the backened for the window management and context creation
+#define GLFW
 #include "../pch.h"
-#ifdef _WIN64
-// telling optimus to switch to nvidia graphics card instead of internal 
-// _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
-#endif
-
-/*
-    setting up stuff needed for test0
-*/
-
+#include "immintrin.h"
 
 typedef struct node{
     int val;
@@ -104,6 +87,7 @@ void test2(){
     ps_clock_start(c);
     while(true){
         ps_clock_update(c,FPS);
+        ps_clock_fps(c);
         ps_clock_fps_print(c);
         ps_clock_dt_print(c);
         ps_clock_reset(c);
@@ -176,11 +160,13 @@ void test3(){
     ps_clock_start(t);
     ps_clock_start(c);
     
-    ps_graphics_window* window = ps_graphics_get_window();
-    ps_graphics_init(window,APPNAME,APPW,APPH);
+    ps_window* window = ps_window_get_handle();
+    ps_window_init(window,APPNAME,APPW,APPH);
     bool is_running = true;
 
-    ps_color color = (ps_color){PS_COLOR_EMERALD, .a=1.0};
+    ps_color color1 = (ps_color){PS_COLOR_EMERALD, .a=1.0};
+    ps_color color2 = (ps_color){PS_COLOR_RED, .a=1.0};
+    bool isgreen = false;
     double shapes_delta[] = {120.0,90.0,60.0,45.0,30.0,15.0,5.0};
     double shapes_time[] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0};
     int total_shapes = sizeof(shapes_delta)/sizeof(shapes_delta[0]);
@@ -188,20 +174,30 @@ void test3(){
     int mode = 0;
     double delta = shapes_delta[mode];
     double duration = shapes_time[mode];
-    char buffer[80];
+    char buffer[WINDOW_TITLE_LEN];
     PS_INFO("%s opengl vendor\n",(char*)glGetString(GL_VENDOR));
     ps_vec2 pos = (ps_vec2){
         .x=0.0,
         .y=0.0
     };
+    ps_color colorz = isgreen?color1:color2;
     while(is_running){
-        ps_graphics_window_poll_events(window);
+        ps_window_poll_events(window);
+        ps_window_input_update(window);
+        if(ps_window_input_keyboard_istriggered_down(window, PS_KEY_SPACE)){
+            isgreen = !isgreen;
+            PS_INFO("space pressed %d",isgreen);
+            PS_INFO("%f %f %f ",colorz.r,colorz.g,colorz.b);
+        }
+        colorz = isgreen?color1:color2;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        ps_vec2 mouse_position = ps_window_input_mouse_get_position(window);
+        mouse_position.x = (mouse_position.x / APPW)*2.0 - 1.0;
+        mouse_position.y = (1.0 - (mouse_position.y/APPH))*2.0 - 1.0;
         for (int i = 1; i < 10; ++i) {
-
             pos = (ps_vec2){
-                .x=cos(ps_clock_uptime(t)*((double)i+1)*0.5 + 10*(double)i*PI/180.0f)*0.2,
-                .y=sin(ps_clock_uptime(t)*((double)i+1)*0.5 + 10*(double)i*PI/180.0f)*0.2
+                .x=mouse_position.x + cos(ps_clock_uptime(t)*((double)i+1)*0.5 + 10*(double)i*PI/180.0f)*0.2,
+                .y=mouse_position.y + sin(ps_clock_uptime(t)*((double)i+1)*0.5 + 10*(double)i*PI/180.0f)*0.2
             };
 
             draw_polygon(
@@ -210,10 +206,22 @@ void test3(){
                 shapes_delta[mode],
                 360.0, 
                 0.05, 
-                color,
+                colorz,
                 false
             );
+
          }
+
+        print_ps_vec2(mouse_position);
+        draw_polygon(
+            GL_LINE_LOOP,
+            mouse_position,
+            shapes_delta[total_shapes-1],
+            360.0,
+            0.05,
+            colorz,
+            false
+        );
         // double dx = 0.05;
         // double pad = 0.0;
         // for (int r = 0; r < 40; ++r) {
@@ -221,17 +229,17 @@ void test3(){
         // }
         ps_clock_update(c,FPS);
         sprintf(buffer, "[%s] (%0.3lf FPS)",APPNAME, ps_clock_fps(c));
-        ps_graphics_window_set_title(window, buffer);
+        ps_window_set_title(window, buffer);
         ps_clock_reset(c);
         if(ps_clock_uptime(c) > shapes_time[mode]){
             mode = (mode+1)%(total_shapes);
             ps_clock_reset_uptime(c);
         }
-        ps_graphics_window_swap_buffers(window);
-        is_running = !ps_graphics_window_should_close(window);
+        ps_window_swap_buffers(window);
+        is_running = !ps_window_should_close(window);
     }
-    ps_graphics_destroy(window);
-    ps_graphics_release_window(window);
+    ps_window_destroy(window);
+    ps_window_release(window);
     ps_clock_stop(c);
     ps_clock_stop(t);
     PS_INFO("total time : %lfs",ps_clock_uptime(t));
@@ -281,12 +289,12 @@ void test5(){
         samples[i] = 0.1f;
     }
 
-    ps_graphics_window* window = ps_graphics_get_window();
-    ps_graphics_init(window,APPNAME,APPW,APPH);
+    ps_window* window = ps_window_get_handle();
+    ps_window_init(window,APPNAME,APPW,APPH);
 
     bool is_running = true;
     while(is_running){
-        ps_graphics_window_poll_events(window);
+        ps_window_poll_events(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         int bars = nbins;
@@ -298,14 +306,14 @@ void test5(){
         }
         ps_clock_update(t,FPS);
         sprintf(buffer, "[%s] (%0.3lf FPS)",APPNAME, ps_clock_fps(t));
-        ps_graphics_window_set_title(window, buffer);
+        ps_window_set_title(window, buffer);
         ps_clock_reset(t);
-        ps_graphics_window_swap_buffers(window);
-        is_running = !ps_graphics_window_should_close(window);
+        ps_window_swap_buffers(window);
+        is_running = !ps_window_should_close(window);
     }
 
-    ps_graphics_destroy(window);
-    ps_graphics_release_window(window);
+    ps_window_destroy(window);
+    ps_window_release(window);
 
     free(samples);
     ps_clock_stop(t);
@@ -810,8 +818,8 @@ void test10() {
     ps_clock_start(t);
     ps_clock_start(c);
     
-    ps_graphics_window* window = ps_graphics_get_window();
-    ps_graphics_init(window,APPNAME,APPW,APPH);
+    ps_window* window = ps_window_get_handle();
+    ps_window_init(window,APPNAME,APPW,APPH);
     bool is_running = true;
 
     ps_color color = (ps_color){PS_COLOR_EMERALD, .a=1.0f};
@@ -855,7 +863,7 @@ void test10() {
     int nindx = nboxes;
 
     while(is_running){
-        ps_graphics_window_poll_events(window);
+        ps_window_poll_events(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         nmsc(
@@ -879,7 +887,7 @@ void test10() {
 
         ps_clock_update(c,FPS);
         sprintf(buffer, "[%s] (%0.3lf FPS)",APPNAME, ps_clock_fps(c));
-        ps_graphics_window_set_title(window, buffer);
+        ps_window_set_title(window, buffer);
         ps_clock_reset(c);
         PS_INFO("nmsthresh : %lf\n",th);
         if(ps_clock_uptime(c) > ttime){
@@ -887,16 +895,16 @@ void test10() {
             ps_clock_reset_uptime(c);
         }
         th = ps_clamp(th + tdt, 0.0, 1.0);
-        ps_graphics_window_swap_buffers(window);
-        is_running = !ps_graphics_window_should_close(window);
+        ps_window_swap_buffers(window);
+        is_running = !ps_window_should_close(window);
     }
 
     free(indx);
     free(boxes);
     free(confs);
 
-    ps_graphics_destroy(window);
-    ps_graphics_release_window(window);
+    ps_window_destroy(window);
+    ps_window_release(window);
     ps_clock_stop(c);
     ps_clock_stop(t);
     PS_INFO("total time : %lfs",ps_clock_uptime(t));
@@ -916,8 +924,8 @@ void data_callback_pan_audio(ma_device* pDevice, void* output, const void* input
     ma_uint32 frames_read = (ma_uint32)ma_decoder_read_pcm_frames(pDecoder, output, frame_count);
 
     for (ma_uint32 i = 0; i < frames_read * C_COUNT; i+=2) {
-        ((float*)output)[i + 0] = ((float*)output)[i + 0] * (1.0-osc01);
-        ((float*)output)[i + 1] = ((float*)output)[i + 1] * (osc01);
+        ((float*)output)[i + 0] = ((float*)output)[i + 0] * (float)(1.0-osc01);
+        ((float*)output)[i + 1] = ((float*)output)[i + 1] * (float)(osc01);
     }
     // That(void) casting construct is a no - op that makes the compiler unused variable warning go away
     (void)input;
@@ -946,8 +954,8 @@ void test11(){
     ps_clock_start(t);
     ps_clock_start(c);
     
-    ps_graphics_window* window = ps_graphics_get_window();
-    ps_graphics_init(window,APPNAME,APPW,APPH);
+    ps_window* window = ps_window_get_handle();
+    ps_window_init(window,APPNAME,APPW,APPH);
     bool is_running = true;
 
     ps_color color1 = (ps_color){PS_COLOR_EMERALD, .a=1.0};
@@ -1010,7 +1018,7 @@ void test11(){
 
     while(is_running){
         // check for any window events here
-        ps_graphics_window_poll_events(window);
+        ps_window_poll_events(window);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         // processing here 
@@ -1058,25 +1066,21 @@ void test11(){
         // clock fps timing stuff here
         ps_clock_update(c,FPS);
         sprintf(buffer, "[%s] (%0.3lf FPS)",APPNAME, ps_clock_fps(c));
-        ps_graphics_window_set_title(window, buffer);
+        ps_window_set_title(window, buffer);
         ps_clock_reset(c);
         if(ps_clock_uptime(c) > shapes_time[mode]){
             mode = (mode+1)%(total_shapes);
             ps_clock_reset_uptime(c);
         }
-        ps_graphics_window_swap_buffers(window);
-        is_running = !ps_graphics_window_should_close(window);
+        ps_window_swap_buffers(window);
+        is_running = !ps_window_should_close(window);
     }
-
-    printf("Playing %s\n", filepath);
-    printf("Press Enter to quit...");
-    int res = getchar();
 
     ma_device_uninit(&device);
     ma_decoder_uninit(&decoder);
 
-    ps_graphics_destroy(window);
-    ps_graphics_release_window(window);
+    ps_window_destroy(window);
+    ps_window_release(window);
     ps_clock_stop(c);
     ps_clock_stop(t);
     PS_INFO("total time : %lfs",ps_clock_uptime(t));

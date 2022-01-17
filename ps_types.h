@@ -8,15 +8,20 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+// platform
+#define GLFW
+
 // constants
 #define APPNAME "Pepper"
 #define APPW 800
 #define APPH 800
 #define FPS 60
 #define MAXFPS 1000
+#define WINDOW_TITLE_LEN 80
 #define PI 3.14159265359
 #define PS_COLOR_EMERALD 46.0/256.0, 204/256.0, 113/256.0
 #define PS_COLOR_RED 231.0/256.0, 76/256.0, 60/256.0
+
 
 // macros
 #define ps_count(x) sizeof((x))/sizeof((x)[0])

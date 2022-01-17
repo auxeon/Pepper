@@ -115,7 +115,7 @@ void ps_clock_reset(ps_clock_data* ps_clock){
 
 void ps_clock_fps_print(ps_clock_data* ps_clock){
     PS_INFO("%lf FPS",1.0/ps_clock_dt(ps_clock));
-    fflush(stdout);
+    // fflush(stdout);
 }
 
 double ps_clock_fps(ps_clock_data* ps_clock){

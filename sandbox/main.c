@@ -619,7 +619,7 @@ void test8() {
 
 
 
-void add_rand_arrays_simple(int* vin_0, int vsz_0, int* vin_1, int vsz_1, int* vout_0) {
+void add_rand_arrays_simple(int* __restrict vin_0, int vsz_0, int* __restrict vin_1, int vsz_1, int* __restrict vout_0) {
     for(int i=0; i<vsz_1; ++i) {
         vout_0[i] = vin_0[i] + vin_1[i];
     }
@@ -674,9 +674,9 @@ void test9() {
     v1 = populate_randints(sz);
     ps_clock_start(t);
     // across the vectorized and noindexing versions there is no difference in speed if i used restrict and -O3
-    // add_rand_arrays_simple(v0,sz,v1,sz,v2);
+    add_rand_arrays_simple(v0,sz,v1,sz,v2);
     // add_rand_arrays_vectorized(v0,sz,v1,sz,v2);
-    add_rand_arrays_noindexing(v0,sz,v1,sz,v2);
+    // add_rand_arrays_noindexing(v0,sz,v1,sz,v2);
     ps_clock_stop(t);
     printf("\n");
     PS_INFO("total time : %lfs", ps_clock_uptime(t));
@@ -1088,6 +1088,76 @@ void test11(){
     (void)getchar();
 }
 
+void test12() {
+    PS_INFO("[%s] : testing out bitsets", __FUNCTION__);
+    ps_clock_data* t = ps_clock_get();
+    ps_clock_start(t);
+
+
+    ps_archetype bitfield=0;
+    ps_bit64_zro(bitfield);
+    ps_bit64_set(bitfield,9);
+    ps_bit64_sho(bitfield);
+    printf("\n");
+    ps_bit64_one(bitfield);
+    ps_bit64_sho(bitfield);
+
+
+    ps_clock_stop(t);
+    printf("\n");
+    PS_INFO("total time : %lfs", ps_clock_uptime(t));
+    printf("\n");
+    (void)getchar();
+}
+
+void draw_cube() {
+    glBegin(GL_LINE_LOOP);
+    glColor3f(0.0f, 1.0f, 1.0f);
+    glVertex2f((GLfloat)0.1f, (GLfloat)0.1f);
+    glVertex2f((GLfloat)0.3f, (GLfloat)0.1f);
+    glVertex2f((GLfloat)0.3f, (GLfloat)0.3f);
+    glVertex2f((GLfloat)0.1f, (GLfloat)0.3f);
+    glEnd();
+}
+
+void test13(){
+    PS_INFO("[%s] : render 3d cube", __FUNCTION__);
+    ps_clock_data* t = ps_clock_get();
+    ps_clock_start(t);
+
+    ps_window* window = ps_window_get_handle();
+    ps_window_init(window,APPNAME,APPW,APPH);
+    char buffer[WINDOW_TITLE_LEN];
+
+
+    bool is_running = true;
+    while(is_running){
+        ps_window_poll_events(window);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // write openGL code here
+        draw_cube();
+        ps_clock_update(t,FPS);
+        sprintf(buffer, "[%s] (%0.3lf FPS)",APPNAME, ps_clock_fps(t));
+        ps_window_set_title(window, buffer);
+        ps_clock_reset(t);
+        ps_window_swap_buffers(window);
+        is_running = !ps_window_should_close(window);
+    }
+
+    ps_window_destroy(window);
+    ps_window_release(window);
+
+
+    ps_clock_stop(t);
+    printf("\n");
+    PS_INFO("total time : %lfs", ps_clock_uptime(t));
+    printf("\n");
+    (void)getchar();
+
+
+}
+
+
 
 int main(int argc,char** argv){
 
@@ -1103,7 +1173,9 @@ int main(int argc,char** argv){
         test8,
         test9,
         test10,
-        test11
+        test11,
+        test12,
+        test13
     };
 
     if(argc > 1){

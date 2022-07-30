@@ -25,7 +25,8 @@
         "ps_keycodes.h": "c",
         "ps_heap.h": "c",
         "ps_logging.h": "c",
-        "ps_progress.h": "c"
+        "ps_progress.h": "c",
+        "stdint.h": "c"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
 }

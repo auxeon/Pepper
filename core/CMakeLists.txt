@@ -13,6 +13,7 @@ set(core_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/ps_events.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/ps_window.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/ps_keycodes.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ps_ecs.h"
 )
 
 add_library(core STATIC ${core_SOURCES} ${core_INCLUDES})

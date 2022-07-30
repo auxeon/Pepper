@@ -8,8 +8,9 @@
 #ifndef PS_CHRONON_H
 #define PS_CHRONON_H
 
+#include "../ps_types.h"
+
 typedef struct ps_clock_data ps_clock_data;
-typedef unsigned long long uint64_t;
 
 ps_clock_data*  ps_clock_get();
 uint64_t        ps_clock_now();

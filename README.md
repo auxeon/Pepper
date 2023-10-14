@@ -8,7 +8,7 @@
 [INSTRUCTIIONS TO INSTALL BUCK2](
 https://buck2.build/docs/getting_started/#installing-buck2)
 
-## To clone the repo with submodules at the recorded commit hashes in the repo
+## To clone the repo at the recorded commit hashes in the repo
 ```
 git clone --recurse-submodules git@github.com:auxeon/Pepper.git
 ```

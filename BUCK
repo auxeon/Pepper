@@ -1,3 +1,4 @@
+# constants
 COMPATIBLE_WITH = [
     "config//os:macos",
     "config//os:linux",

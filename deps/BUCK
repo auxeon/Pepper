@@ -5,6 +5,37 @@ COMPATIBLE_WITH_BASE = [
 ]
 
 cxx_library(
+  name = "miniaudio",
+  srcs = [
+    "miniaudio/extras/miniaudio_split/miniaudio.c",
+  ],
+  compatible_with = COMPATIBLE_WITH_BASE,
+  link_style="static",
+  compiler_flags = [],
+  include_directories = [
+    "miniaudio/extras/miniaudio_split",
+  ],
+  preprocessor_flags = [],
+  public_include_directories = [],
+  exported_linker_flags = select({
+    "DEFAULT": [],
+    "ovr_config//os:linux": [
+      "-lm",
+      "-lpthread",
+      "-ldl"
+    ],
+  }),
+  exported_headers = [
+    "miniaudio/extras/miniaudio_split/miniaudio.h",
+  ],
+  raw_headers = [
+    "miniaudio/extras/miniaudio_split/miniaudio.h",
+  ],
+  visibility = ["PUBLIC"],
+  deps = [],
+)
+
+cxx_library(
   name = "glfw",
   srcs = [
     "glfw/src/context.c",

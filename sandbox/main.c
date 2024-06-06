@@ -8,7 +8,7 @@
 // define the backened for the window management and context creation
 #define GLFW
 #include "../pch.h"
-#include "immintrin.h"
+//#include "immintrin.h"
 
 typedef struct node{
     int val;
@@ -632,21 +632,6 @@ void add_rand_arrays_noindexing(int*  vin_0, int vsz_0, int* vin_1, int vsz_1, i
     }
 }
 
-void add_rand_arrays_vectorized(int* __restrict vin_0, int vsz_0, int* __restrict vin_1, int vsz_1, int* __restrict vout_0) {
-    const int aligned = vsz_1 - vsz_1 % 4;
-    for (int i = 0; i < aligned; i+=4) {
-        _mm_storeu_si128((__m128i*)&vout_0[i], 
-            _mm_add_epi32(
-                _mm_loadu_si128((__m128i*)&vin_0[i]), 
-                _mm_loadu_si128((__m128i*)&vin_1[i])
-            )
-        );
-    }
-    for (int i = aligned; i < vsz_1; ++i) {
-        vout_0[i] = vin_0[i] + vin_1[i];
-    }
-}
-
 int* populate_randints(int vsz_0) {
     int* vout_0 = (int*)malloc(sizeof(int)*vsz_0);
     if (!vout_0) {
@@ -664,7 +649,7 @@ void print_array(int* vin_0, int vsz_0) {
     }
 }
 void test9() {
-    PS_INFO("[%s] : vectorized addition test", __FUNCTION__);
+    PS_INFO("[%s] : addition test", __FUNCTION__);
     ps_clock_data* t = ps_clock_get();
     int sz = 1000000000;
     int* v0 = NULL;

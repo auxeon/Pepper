@@ -27,8 +27,8 @@
 
 // WINDOWING FRAMEWORK
 #ifdef GLFW
-#include "../lib/glad/include/glad/glad.h"
-#include "../lib/glfw/include/GLFW/glfw3.h"
+#include "lib/glad/include/glad/glad.h"
+#include "lib/glfw/include/GLFW/glfw3.h"
 #endif
 
 #endif

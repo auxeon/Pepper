@@ -355,7 +355,7 @@ void test6(){
     ma_device_config deviceConfig;
     ma_device device;
 
-    const char* buffer = "ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3";
+    const char* buffer = "sandbox/ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3";
     result = ma_decoder_init_file(buffer, NULL, &decoder);
     if (result != SUCCESS) {
         PS_ERROR("decoder failed\n");
@@ -499,7 +499,7 @@ void test7() {
     ma_uint32 iDecoder;
 
     // play 2 source files and then fade back and forth across them s
-    const char* buffer[] = { "ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3", "daft_punk_get_lucky.mp3" };
+    const char* buffer[] = { "sandbox/ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3", "sandbox/daft_punk_get_lucky.mp3" };
 
     g_decoderCount = 2;
     g_pDecoders = (ma_decoder*)malloc(sizeof(*g_pDecoders) * g_decoderCount);
@@ -813,7 +813,7 @@ void test10() {
     char buffer[80];
     PS_INFO("%s opengl vendor\n",(char*)glGetString(GL_VENDOR));
 
-    FILE* f = fopen("boxconfs.dat","r");
+    FILE* f = fopen("sandbox/boxconfs.dat","r");
     int nboxes;
 
     /* no op (void) to suppress unused return value warning */
@@ -971,7 +971,7 @@ void test11(){
     ma_device device;
     customdata cdata;
 
-    const char* filepath = "ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3";
+    const char* filepath = "sandbox/ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3";
     result = ma_decoder_init_file(filepath, NULL, &decoder);
     if (result != SUCCESS) {
         PS_ERROR("decoder failed\n");

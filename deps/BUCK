@@ -14,7 +14,12 @@ cxx_library(
     ".",
   ],
   preprocessor_flags = [],
-  public_include_directories = [],
+  raw_headers = [
+    "miniaudio/miniaudio.h",
+  ],
+  public_include_directories = [
+    "."
+  ],
   exported_linker_flags = select({
     "DEFAULT": [],
     "ovr_config//os:linux": [
@@ -23,12 +28,6 @@ cxx_library(
       "-ldl"
     ],
   }),
-  exported_headers = [
-    "miniaudio/miniaudio.h",
-  ],
-  raw_headers = [
-    "miniaudio/miniaudio.h",
-  ],
   visibility = ["PUBLIC"],
   deps = [],
 )
@@ -104,7 +103,7 @@ cxx_library(
   }),
   public_include_directories = [
       "glfw/include",
-    ],
+  ],
   exported_linker_flags = select({
     "DEFAULT": [],
     "ovr_config//os:macos": [
@@ -133,10 +132,6 @@ cxx_library(
     "glad/include/glad/glad.h",
     "glad/include/KHR/khrplatform.h",
   ]),
-  exported_headers = glob([
-    "glad/include/glad/glad.h"
-  ]),
-  include_directories = ["."],
   public_include_directories = [
     "glad/include",
   ],
@@ -161,7 +156,7 @@ cxx_library(
         ],
     ),
     compatible_with = COMPATIBLE_WITH_BASE,
-    exported_headers = glob([
+    raw_headers = glob([
         "googletest/googletest/include/gtest/*.h",
         "googletest/googlemock/include/gmock/*.h",
     ]),

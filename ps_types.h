@@ -9,9 +9,7 @@
 #define TYPES_H
 
 #include "stdint.h"
-
-// platform
-#define GLFW
+#include "stdbool.h"
 
 // constants
 #define APPNAME "Pepper"

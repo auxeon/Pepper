@@ -248,7 +248,7 @@ static void bst_print_postorder(node** n){
     printf("%d ", (*n)->data);
 }
         
-int main(int argc, char** argv){
+static int bst_tests(int argc, char** argv){
    /*
              12
        6            16

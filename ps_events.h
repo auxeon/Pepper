@@ -8,7 +8,11 @@
 #ifndef PS_EVENTS_H
 #define PS_EVENTS_H
 
-#include "../ps_types.h"
+#include "ps_types.h"
 
+typedef struct ps_event{
+    ps_event_id id;
+    ps_size_t sz;
+}ps_event;
 
 #endif

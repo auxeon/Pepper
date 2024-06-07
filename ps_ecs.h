@@ -8,7 +8,7 @@
 #ifndef PS_ECS_H
 #define PS_ECS_H
 
-#include "../ps_types.h"
+#include "ps_types.h"
 
 
 

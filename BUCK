@@ -15,28 +15,44 @@ filegroup(
   ],
 )
 
+cxx_library(
+  name = "pepper",
+  srcs = [
+    "pepper.c",
+  ],
+  exported_preprocessor_flags=[
+    "-DGLFW",
+  ],
+  link_style = "static",
+  exported_headers = [
+    "pepper.h",
+  ],
+  public_include_directories = [
+    ".",
+  ],
+  visibility = ["PUBLIC"],
+  exported_deps = [
+    "//deps:glad",
+    "//deps:glfw",
+    "//deps:miniaudio",
+  ],
+)
+
 cxx_binary(
     name="app",
     compatible_with=COMPATIBLE_WITH,
     srcs=[
       "tests.c",
-      "ps_chronon.c",
-      "ps_events.c",
-      "ps_window.c",
-      "pch.c",
     ],
     include_directories=[
       ".",
-      "deps",
     ],
     compiler_flags=[
       "-g",
     ],
     link_style = "static",
     deps=[
-      "//deps:glad",
-      "//deps:glfw",
-      "//deps:miniaudio",
+      ":pepper",
     ],
     resources=[
       ":resources",

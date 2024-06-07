@@ -6,24 +6,22 @@
 */
 
 // define the backened for the window management and context creation
-#define GLFW
-#include "../pch.h"
-//#include "immintrin.h"
+#include <pepper.h>
 
-typedef struct node{
+typedef struct vnode{
     int val;
     int id;
-}node;
+}vnode;
 
-node node_create(int val, int id){
-    return (node){val, id};
+vnode node_create(int val, int id){
+    return (vnode){val, id};
 }
 /*
     essential to setup the struct needed for vector ops using macros
 */
-ps_vector_declare(node);
+ps_vector_declare(vnode);
 
-void display_macro_version(ps_vector_node* v){
+void display_macro_version(ps_vector_vnode* v){
     for(int i=0;i<v->size;++i){
         printf("%d[%d] ",ps_vector_at(*v,i).id, ps_vector_at(*v,i).val);
     }
@@ -32,7 +30,7 @@ void display_macro_version(ps_vector_node* v){
 
 void display_merge(void* n, ps_size_t size){
     for(int i=0;i<size;++i){
-        printf("%d ",((node*)n)[i].val);
+        printf("%d ",((vnode*)n)[i].val);
     }
     printf("\n");
 }
@@ -43,11 +41,11 @@ void display_merge(void* n, ps_size_t size){
 void test0(){
     int gi_count = 0;
     PS_INFO("[%s] : using macro based generic vector types",__FUNCTION__);
-    ps_vector_node v_node;
-    ps_vector_create(v_node,node);
-    ps_vector_push_back(v_node,node_create(gi_count++,0),node);
-    ps_vector_push_back(v_node,node_create(gi_count++,1),node);
-    ps_vector_push_back(v_node,node_create(gi_count++,2),node);
+    ps_vector_vnode v_node;
+    ps_vector_create(v_node,vnode);
+    ps_vector_push_back(v_node,node_create(gi_count++,0),vnode);
+    ps_vector_push_back(v_node,node_create(gi_count++,1),vnode);
+    ps_vector_push_back(v_node,node_create(gi_count++,2),vnode);
     display_macro_version(&v_node);
     ps_vector_clear(v_node);
 }
@@ -56,24 +54,24 @@ int compare_vector_node(
         const void* a, 
         const void* b
     ){
-    return (*(const node*)a).val < (*(const node*)b).val;
+    return (*(const vnode*)a).val < (*(const vnode*)b).val;
 }
 /*
     performing mergesort on vector_macros version
 */
 void test1(){
     PS_INFO("[%s] : using mergesort on generic vector types",__FUNCTION__);
-    ps_vector_node v1;
-    ps_vector_create(v1,node);
+    ps_vector_vnode v1;
+    ps_vector_create(v1,vnode);
     int data[] = {1,4,3,0,5,45,22};
     for(int i=0;i<ps_count(data);++i){
-        ps_vector_push_back(v1,node_create(data[i],0),node);
+        ps_vector_push_back(v1,node_create(data[i],0),vnode);
     }
     display_merge(v1.data,ps_count(data));
-    ps_mergesort(v1.data,0,ps_vector_size(v1)-1,sizeof(node),compare_vector_node);
+    ps_mergesort(v1.data,0,ps_vector_size(v1)-1,sizeof(vnode),compare_vector_node);
     display_merge(v1.data,ps_count(data));
-    ps_vector_pop_back(v1,node);
-    ps_vector_pop_back(v1,node);
+    ps_vector_pop_back(v1,vnode);
+    ps_vector_pop_back(v1,vnode);
     display_merge(v1.data,v1.size);
     (void)getchar();
 }

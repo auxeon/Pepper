@@ -3,10 +3,15 @@
         {
             "name": "Mac",
             "includePath": [
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk/usr/include",
                 "${default}",
-                "${workspaceFolder}"
+                "${workspaceFolder}",
+                "${workspaceFolder}/deps/glad/include",
+                "${workspaceFolder}/deps/glfw/include"
             ],
-            "defines": [],
+            "defines": [
+                "GLFW"
+            ],
             "macFrameworkPath": [
                 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks"
             ],

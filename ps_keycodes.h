@@ -8,7 +8,6 @@
 #ifndef PS_KEYCODES_H
 #define PS_KEYCODES_H
 
-#define GLFW
 #include "ps_defines.h"
 
 #ifdef GLFW

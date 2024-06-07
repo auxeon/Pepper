@@ -26,7 +26,7 @@
         "ps_heap.h": "c",
         "ps_logging.h": "c",
         "ps_progress.h": "c",
-        "stdint.h": "c"
-    },
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+        "stdint.h": "c",
+        "pepper.h": "c"
+    }
 }

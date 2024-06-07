@@ -20,14 +20,14 @@
 #include "sys/timeb.h"
 #include "time.h"
 // dsa utils libs
-#include "lib/ps_heap.h"
-#include "lib/ps_logging.h"
-#include "lib/ps_math.h"
-#include "lib/ps_mergesort.h"
-#include "lib/ps_progress.h"
-#include "lib/ps_vector.h"
+#include "ps_heap.h"
+#include "ps_logging.h"
+#include "ps_math.h"
+#include "ps_mergesort.h"
+#include "ps_progress.h"
+#include "ps_vector.h"
 // core
-#include "core/ps_chronon.h"
-#include "core/ps_keycodes.h"
-#include "core/ps_window.h"
+#include "ps_chronon.h"
+#include "ps_keycodes.h"
+#include "ps_window.h"
 #endif 

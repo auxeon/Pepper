@@ -6,14 +6,12 @@ COMPATIBLE_WITH_BASE = [
 
 cxx_library(
   name = "miniaudio",
-  srcs = [
-    "miniaudio/extras/miniaudio_split/miniaudio.c",
-  ],
+  srcs = [],
   compatible_with = COMPATIBLE_WITH_BASE,
   link_style="static",
   compiler_flags = [],
   include_directories = [
-    "miniaudio/extras/miniaudio_split",
+    ".",
   ],
   preprocessor_flags = [],
   public_include_directories = [],
@@ -26,10 +24,10 @@ cxx_library(
     ],
   }),
   exported_headers = [
-    "miniaudio/extras/miniaudio_split/miniaudio.h",
+    "miniaudio/miniaudio.h",
   ],
   raw_headers = [
-    "miniaudio/extras/miniaudio_split/miniaudio.h",
+    "miniaudio/miniaudio.h",
   ],
   visibility = ["PUBLIC"],
   deps = [],

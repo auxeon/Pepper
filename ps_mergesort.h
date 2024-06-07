@@ -7,9 +7,9 @@
 #ifndef PS_MERGESORT_H
 #define PS_MERGESORT_H
 
-#include "string.h"
-#include "stdlib.h"
-#include "stdio.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "ps_types.h"
 
 static void ps_merge(void* vec, ps_size_t s, ps_size_t e, ps_size_t d_sz, int cmp(const void* a, const void* b)){

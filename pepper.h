@@ -1,7 +1,7 @@
-#include "stdio.h"
-#include "stdlib.h"
-#include "string.h"
-#include "limits.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
 
 #ifndef PS_BST_H
 #define PS_BST_H
@@ -427,8 +427,8 @@ typedef struct ps_event{
  @brief ps_heap max and min heap 
 */
 
-#include "stdlib.h"
-#include "string.h"
+#include <stdlib.h>
+#include <string.h>
 #include "ps_types.h"
 
 #define parent(i) (i-1)/2
@@ -893,9 +893,9 @@ static ps_vec4 ps_vec4_quaternion_slerp(const ps_vec4 q0, const ps_vec4 q1, doub
 #ifndef PS_MERGESORT_H
 #define PS_MERGESORT_H
 
-#include "string.h"
-#include "stdlib.h"
-#include "stdio.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "ps_types.h"
 
 static void ps_merge(void* vec, ps_size_t s, ps_size_t e, ps_size_t d_sz, int cmp(const void* a, const void* b)){

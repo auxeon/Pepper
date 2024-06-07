@@ -5,8 +5,8 @@
  @brief ps_heap max and min heap 
 */
 
-#include "stdlib.h"
-#include "string.h"
+#include <stdlib.h>
+#include <string.h>
 #include "ps_types.h"
 
 #define parent(i) (i-1)/2

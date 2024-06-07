@@ -1,4 +1,4 @@
-#include "pepper.h"
+#include <pepper.h>
 /**
  @author Abhikalp Unakal
  @date 08 june 2021
@@ -13,10 +13,10 @@
 #include "mach/mach_time.h"
 #endif
 
+#include <stdbool.h>
+#include <stdlib.h>
+#include <sys/timeb.h>
 #include "ps_chronon.h"
-#include "stdbool.h"
-#include "stdlib.h"
-#include "sys/timeb.h"
 #include "ps_logging.h"
 #include "ps_vector.h"
 
@@ -140,21 +140,20 @@ void ps_clock_update(ps_clock_data* ps_clock, double fps){
 /**
  @author Abhikalp Unakal
  @date  16 jan 2022
- @file ps_graphics.c
+ @file ps_window.c
  @brief pepper engine core os api layer wrapper
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 #include "ps_types.h"
 #include "ps_defines.h"
 #include "ps_window.h"
 #include "ps_keycodes.h"
 #include "ps_logging.h"
 #include "ps_math.h"
-#include "stdbool.h"
-#include "stdio.h"
-#include "stdlib.h"
-#include "string.h"
-#include "math.h"
 
 typedef struct ps_mouse_t{
   ps_size_t num; // number of buttons

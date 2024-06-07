@@ -5,17 +5,16 @@
  @brief pepper engine core os api layer wrapper
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 #include "ps_types.h"
 #include "ps_defines.h"
 #include "ps_window.h"
 #include "ps_keycodes.h"
 #include "ps_logging.h"
 #include "ps_math.h"
-#include "stdbool.h"
-#include "stdio.h"
-#include "stdlib.h"
-#include "string.h"
-#include "math.h"
 
 typedef struct ps_mouse_t{
   ps_size_t num; // number of buttons

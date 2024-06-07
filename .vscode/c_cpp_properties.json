@@ -3,7 +3,6 @@
         {
             "name": "Mac",
             "includePath": [
-                "/Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk/usr/include",
                 "${default}",
                 "${workspaceFolder}",
                 "${workspaceFolder}/deps/glad/include",

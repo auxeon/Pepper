@@ -16,35 +16,35 @@
 #include "ps_logging.h"
 #include "ps_math.h"
 
-typedef struct ps_mouse_t{
+typedef struct ps_mouse_t {
   ps_size_t num; // number of buttons
   uint8_t* keystate; // current frame button states
   ps_vec2 position; // current mouse position
-}ps_mouse_t;
+} ps_mouse_t;
 
-typedef struct ps_keyboard_t{
+typedef struct ps_keyboard_t {
   ps_size_t num; // number of keys 
   uint8_t* keystate; // current key state
-}ps_keyboard_t;
+} ps_keyboard_t;
 
-typedef struct ps_input_t{
+typedef struct ps_input_t {
   ps_mouse_t mouse0; // previous mouse
   ps_mouse_t mouse1; // current mouse
   ps_keyboard_t keyboard0; // previous keyboard
   ps_keyboard_t keyboard1; // current keyboard
-}ps_input_t;
+} ps_input_t;
 
-typedef struct ps_window_impl{
+typedef struct ps_window_impl {
   GLFWwindow* handle0; // graphics handle 0
   ps_input_t* input0; // input handle 0
-}ps_window_impl;
+} ps_window_impl;
 
-typedef struct ps_window{
+typedef struct ps_window {
   char title[WINDOW_TITLE_LEN];
   int width;
   int height;
   ps_window_impl window;
-}ps_window;
+} ps_window;
 
 ps_window* ps_window_current = NULL;
 
@@ -69,7 +69,7 @@ void ps_window_release(ps_window* window) {
   free(window);
 }
 
-void ps_window_init(ps_window* window, const char* title, int width, int height){
+void ps_window_init(ps_window* window, const char* title, int width, int height) {
   #ifdef GLFW
   if(!glfwInit()){
       fprintf(stderr, "%s : %s : line %d : failed to initialize glfw\n",__FILE__, __FUNCTION__, __LINE__);
@@ -81,7 +81,9 @@ void ps_window_init(ps_window* window, const char* title, int width, int height)
   // create window
   glfwWindowHint(GLFW_DECORATED, true);
 	glfwWindowHint(GLFW_RESIZABLE, true);
-  window->window.handle0 = glfwCreateWindow(window->width,window->height,window->title,NULL,NULL);
+  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+  window->window.handle0 = glfwCreateWindow(window->width,window->height,window->title,monitor,NULL);
+  glfwSetWindowSizeCallback(window->window.handle0, ps_window_resize);
   if(!window->window.handle0){
       fprintf(stderr, "%s : %s : line %d : failed to create glfw window\n",__FILE__, __FUNCTION__, __LINE__);
       exit(-1);  
@@ -103,32 +105,34 @@ void ps_window_init(ps_window* window, const char* title, int width, int height)
   #endif
 }
 
-ps_vec2 ps_window_screen_get_size(ps_window* window){
+ps_vec2 ps_window_screen_get_size(ps_window* window) {
   GLFWmonitor* monitor = glfwGetPrimaryMonitor();
   const GLFWvidmode* mode = glfwGetVideoMode(monitor);
   return (ps_vec2){.x=(double)mode->width,.y=(double)mode->height};
 }
 
-ps_vec2 ps_window_get_size(ps_window* window){
+ps_vec2 ps_window_get_size(ps_window* window) {
   return (ps_vec2){.x=window->width,.y=window->height};
 }
 
-void ps_window_update(ps_window* window){
+void ps_window_update(ps_window* window) {
   
 }
 
-void ps_window_resize(GLFWwindow* glfwwindow, int w, int h){
-  glfwSetWindowSize(glfwwindow, w, h);
-  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-  const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+void ps_window_resize(GLFWwindow* glfwwindow, int w, int h) {
+  // glfwSetWindowSize(glfwwindow, w, h);
+  // GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+  // const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+  // printf("window resized : %d, %d\n", w, h);
   // double ratio = w / h;
   // if(ratio > 1.0){
-  //   glViewport((GLint)fabs((mode->width - w)/2.0), 0, APPW, APPH);
+    // glViewport((GLint)fabs((mode->width - w)/2.0), 0, APPW, APPH);
   // }
   // else if (ratio < 1.0){
-  //   glViewport(0,(GLint)fabs((mode->width - w)/2.0), APPW, APPH);
+    // glViewport(0,(GLint)fabs((mode->width - w)/2.0), APPW, APPH);
   // }
   glViewport(0, 0, w, h);
+  glfwSwapBuffers(glfwwindow);
 }
 
 void ps_window_set_title(ps_window* window, const char* buffer) {

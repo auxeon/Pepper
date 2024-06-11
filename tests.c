@@ -98,8 +98,6 @@ void test2(){
     (void)getchar();
 }
 
-
-/* r is the reductor to maintain state across function calls */
 void draw_polygon(GLenum mode, ps_vec2 point, double delta, double angle, double radius, ps_color color, bool fliph){
     glBegin(mode);
     double alpha = ps_clamp(color.a,0.0f,1.0f);
@@ -114,7 +112,6 @@ void draw_polygon(GLenum mode, ps_vec2 point, double delta, double angle, double
     glEnd();
 }
 
-/* r is the reductor to maintain state across function calls */
 void draw_rectangle(ps_vec2 bottom_left, ps_vec2 size, ps_color color) {
     const double alpha = ps_clamp(color.a,0.0f,1.0f);
     glColor3f((GLfloat)sin(color.r) * (GLfloat)alpha, (GLfloat)sin(color.g) * (GLfloat)alpha, (GLfloat)sin(color.b) * (GLfloat)alpha);
@@ -970,7 +967,7 @@ void test11(){
     ma_device device;
     customdata cdata;
 
-    const char* filepath = "ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3";
+    const char* filepath = "resources/ffdp_wrong_side_of_heaven_cover_abhikalp_unakal.mp3";
     result = ma_decoder_init_file(filepath, NULL, &decoder);
     if (result != SUCCESS) {
         PS_ERROR("decoder failed\n");

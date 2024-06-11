@@ -2,14 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <stdbool.h>
 
 #ifndef PS_BST_H
 #define PS_BST_H
 
-#define true 1
-#define false 0
 #define COUNT(x) sizeof(x)/sizeof(x[0])
-
 
 typedef struct node{
     int data;
@@ -248,7 +246,7 @@ static void bst_print_postorder(node** n){
     printf("%d ", (*n)->data);
 }
         
-static int bst_tests(int argc, char** argv){
+static int bst_tests(){
    /*
              12
        6            16

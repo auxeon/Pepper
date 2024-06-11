@@ -2,14 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <stdbool.h>
 
 #ifndef PS_BST_H
 #define PS_BST_H
 
-#define true 1
-#define false 0
 #define COUNT(x) sizeof(x)/sizeof(x[0])
-
 
 typedef struct node{
     int data;
@@ -248,7 +246,7 @@ static void bst_print_postorder(node** n){
     printf("%d ", (*n)->data);
 }
         
-static int bst_tests(int argc, char** argv){
+static int bst_tests(){
    /*
              12
        6            16
@@ -898,7 +896,7 @@ static ps_vec4 ps_vec4_quaternion_slerp(const ps_vec4 q0, const ps_vec4 q1, doub
 #include <stdio.h>
 #include "ps_types.h"
 
-static void ps_merge(void* vec, ps_size_t s, ps_size_t e, ps_size_t d_sz, int cmp(const void* a, const void* b)){
+static void _ps_merge_impl(void* vec, void* aux, ps_size_t s, ps_size_t e, ps_size_t d_sz, int cmp(const void* a, const void* b)){
     ps_size_t i=0,j=0,k=s;
     ps_size_t m = s + (e-s)/2;
     ps_size_t ln = m-s+1; 
@@ -924,14 +922,20 @@ static void ps_merge(void* vec, ps_size_t s, ps_size_t e, ps_size_t d_sz, int cm
     free(l);
 }
 
-static void ps_mergesort(void* vec, ps_size_t s, ps_size_t e, ps_size_t d_sz, int cmp(const void* a, const void* b)){
+static void _ps_mergesort_impl(void* vec, void* aux, ps_size_t s, ps_size_t e, ps_size_t d_sz, int (*cmp)(const void* a, const void* b)) {
     if(s >= e){
         return;
     }
     ps_size_t m = s + (e - s)/2;
-    ps_mergesort(vec, s, m, d_sz, cmp);
-    ps_mergesort(vec, m+1, e, d_sz, cmp);
-    ps_merge(vec,s,e,d_sz,cmp);
+    _ps_mergesort_impl(vec, aux, s, m, d_sz, cmp);
+    _ps_mergesort_impl(vec, aux, m+1, e, d_sz, cmp);
+    _ps_merge_impl(vec, aux, s, e, d_sz, cmp);
+}
+
+static void ps_mergesort(void* vec, ps_size_t s, ps_size_t e, ps_size_t d_sz, int cmp(const void* a, const void* b)){
+    void* aux = (char*)malloc(ps_max(d_sz * (e-s+1), 0));
+    _ps_mergesort_impl(vec, aux, s, e, d_sz, cmp);
+    free(aux);
 }
 
 #endif
@@ -1142,6 +1146,7 @@ void                ps_window_poll_events(ps_window* window); // refresh underly
 int                 ps_window_should_close(ps_window* window); // is the window signals to close
 void                ps_window_swap_buffers(ps_window* window); // swap the render buffers of current window
 void                ps_window_release(ps_window* window); // release any acquired resources
+void                ps_window_resize(GLFWwindow* glfwwindow, int w, int h); // resize callback for window
 void                ps_window_destroy(ps_window* window); // destroy the window and its context and stop processing events
 ps_vec2             ps_window_screen_get_size(ps_window* window); // get current screen w,h
 ps_vec2             ps_window_get_size(ps_window* window); // get current window w,h

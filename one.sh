@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo "#include <pepper.h>" > header_.h
+
 cat ps_*.h > pepper_.h
 cat ps_*.c > pepper_.c
 

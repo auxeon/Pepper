@@ -29,6 +29,7 @@ cxx_library(
   ],
   public_include_directories = [
     ".",
+    "core",
   ],
   visibility = ["PUBLIC"],
   exported_deps = [
@@ -40,6 +41,27 @@ cxx_library(
 
 cxx_binary(
     name="app",
+    compatible_with=COMPATIBLE_WITH,
+    srcs=[
+      "app.c",
+    ],
+    include_directories=[
+      ".",
+    ],
+    compiler_flags=[
+      "-O3",
+    ],
+    link_style = "static",
+    deps=[
+      ":pepper",
+    ],
+    resources=[
+      ":resources",
+    ],
+)
+
+cxx_binary(
+    name="test",
     compatible_with=COMPATIBLE_WITH,
     srcs=[
       "tests.c",

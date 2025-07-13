@@ -1,12 +1,6 @@
-[submodule "prelude"]
-	path = prelude
-	url = https://github.com/facebook/buck2-prelude.git
 [submodule "deps/glfw"]
 	path = deps/glfw
 	url = https://github.com/glfw/glfw.git
-[submodule "deps/googletest"]
-	path = deps/googletest
-	url = https://github.com/google/googletest.git
 [submodule "deps/miniaudio"]
 	path = deps/miniaudio
 	url = https://github.com/mackron/miniaudio.git

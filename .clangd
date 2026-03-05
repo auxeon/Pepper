@@ -12,3 +12,4 @@ CompileFlags:
     - -I./deps/glfw/include
     - -I./deps/googletest/googletest/include
     - -I./deps/googletest/googlemock/include
+    - -DGLFW

@@ -154,6 +154,9 @@ void ps_clock_update(ps_clock_data* ps_clock, double fps){
 #include "ps_keycodes.h"
 #include "ps_logging.h"
 #include "ps_math.h"
+#ifdef GLFW
+#include "GLFW/glfw3.h"
+#endif
 
 typedef struct ps_mouse_t {
   ps_size_t num; // number of buttons

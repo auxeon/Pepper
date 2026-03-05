@@ -42,8 +42,3 @@ noop_test_toolchain(
     visibility = ["PUBLIC"],
 )
 
-remote_test_execution_toolchain(
-    name = "remote_test_execution",
-    visibility = ["PUBLIC"],
-)
-

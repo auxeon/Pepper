@@ -51,6 +51,7 @@ void run(){
     };
     ps_color colorz = isgreen?color1:color2;
     while(is_running){
+        ps_window_resize_viewport(window);
         ps_window_poll_events(window);
         ps_window_input_update(window);
         if(ps_window_input_keyboard_istriggered_down(window, PS_KEY_SPACE) || ps_window_input_mouse_istriggered_down(window, PS_MOUSE_BUTTON_1)) {

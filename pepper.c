@@ -211,6 +211,13 @@ void ps_window_release(ps_window* window) {
   free(window);
 }
 
+void ps_window_resize_viewport(ps_window* window)
+{
+  int fbWidth, fbHeight;
+  glfwGetFramebufferSize(window->window.handle0, &fbWidth, &fbHeight);
+  glViewport(0, 0, fbWidth, fbHeight);
+}
+
 void ps_window_init(ps_window* window, const char* title, int width, int height) {
   #ifdef GLFW
   if(!glfwInit()){
@@ -226,7 +233,7 @@ void ps_window_init(ps_window* window, const char* title, int width, int height)
   // GLFWmonitor* monitor = glfwGetPrimaryMonitor();
   GLFWmonitor* monitor = NULL;
   window->window.handle0 = glfwCreateWindow(window->width,window->height,window->title,monitor,NULL);
-  glfwSetWindowSizeCallback(window->window.handle0, ps_window_resize);
+  glfwSetFramebufferSizeCallback(window->window.handle0, ps_window_resize);
   if(!window->window.handle0){
       fprintf(stderr, "%s : %s : line %d : failed to create glfw window\n",__FILE__, __FUNCTION__, __LINE__);
       exit(-1);  

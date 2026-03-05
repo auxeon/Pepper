@@ -1,12 +1,8 @@
 # Pepper
+![Pepper Build](https://github.com/auxeon/Pepper/actions/workflows/main.yml/badge.svg)
 
-## what it is 
+## What it is 
 * Pepper is an engine to develop and prototype things quick in a sandbox environment
-
-# Quick
-
-[INSTRUCTIIONS TO INSTALL BUCK2](
-https://buck2.build/docs/getting_started/#installing-buck2)
 
 ## To clone the repo with submodules at the recorded commit hashes in the repo
 ```

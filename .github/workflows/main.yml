@@ -19,8 +19,4 @@ jobs:
         uses: dtolnay/install-buck2@v1 
       - run: buck2 clean
       - run: |
-            buck2 build //:py_install_venv
-            source venv/bin/activate
-            buck2 build //...
-            deactivate
-            buck2 build //:py_uninstall_venv
+            buck2 build //:app

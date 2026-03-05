@@ -13,8 +13,8 @@
 
 // constants
 #define APPNAME "Pepper"
-#define APPW 800
-#define APPH 800
+#define APPW 400
+#define APPH 400
 #define FPS 60
 #define MAXFPS 1000
 #define MAXENTITIES 1000000

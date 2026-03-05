@@ -223,7 +223,8 @@ void ps_window_init(ps_window* window, const char* title, int width, int height)
   // create window
   glfwWindowHint(GLFW_DECORATED, true);
 	glfwWindowHint(GLFW_RESIZABLE, true);
-  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+  // GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+  GLFWmonitor* monitor = NULL;
   window->window.handle0 = glfwCreateWindow(window->width,window->height,window->title,monitor,NULL);
   glfwSetWindowSizeCallback(window->window.handle0, ps_window_resize);
   if(!window->window.handle0){
@@ -237,8 +238,9 @@ void ps_window_init(ps_window* window, const char* title, int width, int height)
       fprintf(stderr, "%s : %s : line %d : failed to initialize OpenGL context\n",__FILE__, __FUNCTION__, __LINE__);
       exit(-1);
   }
-
-  glViewport(0,0,window->width,window->height);
+  int fbWidth, fbHeight;
+  glfwGetFramebufferSize(window->window.handle0, &fbWidth, &fbHeight);
+  glViewport(0,0,fbWidth,fbHeight);
   glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBlendEquation(GL_FUNC_ADD);
